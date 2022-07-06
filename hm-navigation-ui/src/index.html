@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>百度一下,你就知道</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body>
+<div style="margin-top: 10%;">
+    <!--中间-->
+    <div class="center">
+        <!--logo-->
+        <div class="c_logo">
+            <img src="https://www.baidu.com/img/bd_logo1.png" class="c_img">
+        </div>
+        <form action="/search/code">
+            <!--搜索框input-->
+            <div class="c_input">
+                <input type="hidden" name="url" id="url"/>
+                <input type="text" name="code" class="c_input1" id="search">
+                <input type="submit" value="百度一下" class="c_btn">
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+
+</html>
+<script>
+    document.getElementById("url").value = window.location.href;
+    document.getElementById('search').focus();
+</script>

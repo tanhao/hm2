@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mem.dao.TranMapper">
+
+    <select id="execBet" statementType="CALLABLE" parameterType="com.xzy.pojo.mem.BetRp">
+          call SP_HM_BET(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{lotteryId,mode=IN,jdbcType=INTEGER},
+                #{gameNo,mode=IN,jdbcType=BIGINT},
+                #{betTotalAmt,mode=IN,jdbcType=INTEGER},
+                #{uniqueId,mode=IN,jdbcType=BIGINT},
+                #{autoNewOdds,mode=IN,jdbcType=INTEGER},
+                #{betInfo,mode=IN,jdbcType=VARCHAR},
+                #{betSource,mode=IN,jdbcType=VARCHAR},
+                #{resultAccountDay,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{keys,mode=OUT,jdbcType=VARCHAR}
+          )
+    </select>
+
+    <select id="calculateStats" statementType="CALLABLE" parameterType="com.xzy.pojo.mem.BetRp">
+        call SP_CALCULATE_STATS(
+            #{betJsonArr,mode=IN,jdbcType=VARCHAR},
+            #{userId,mode=IN,jdbcType=INTEGER},
+            #{lotteryId,mode=IN,jdbcType=INTEGER},
+            #{gameNo,mode=IN,jdbcType=VARCHAR},
+            0,
+            #{uniqueId,mode=IN,jdbcType=VARCHAR},
+            '',
+            #{resultAccountDay,mode=IN,jdbcType=VARCHAR},
+            #{errcode,mode=OUT,jdbcType=INTEGER}
+        )
+    </select>
+
+    <select id="selectBetTime" resultType="com.xzy.pojo.mem.BetTime">
+        select hr.status,hr.account_day,
+        hr.open_time-tul.delay_open-tl.delay_open start_time,
+        hr.action_time-tul.precede_close-tl.precede_close stop_time,
+        hr.action_time-tul.zm_precede_close-tul.zm_precede_close zm_stop_time
+        from hm_ctrl.t_user_lottery tul
+        join hm_ctrl.t_lottery tl on tul.lottery_id = tl.lottery_id
+        join hm_order.hm_result hr on hr.lottery_id =  tl.lottery_id and hr.game_no = #{gameNo}
+        and tl.lottery_id=#{lotteryId} and tul.user_id= #{userId};
+    </select>
+</mapper>

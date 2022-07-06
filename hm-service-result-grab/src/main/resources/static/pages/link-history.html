@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body >
+<div id="app">
+    <div class="x-body">
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    <span class="x-red">*</span>日期
+                </label>
+                <div class="layui-input-block" >
+                        <input class="layui-input" style="width: 30%" placeholder="历史日期" name="dateTime" id="dateTime" v-model="param.date">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">
+                    <span class="x-red">*</span> 结果网
+                </label>
+                <div class="layui-input-block" >
+                    <span v-for="item in httpItems" @click="getLinkJson(item)">
+                        <input type="radio" name="1" :value="item.http" :title="findLinkName(item.http)" >
+                    </span>
+                </div>
+            </div>
+            <div class="layui-form-item" v-if="Object.keys(historyLinkItems).length!=0">
+                <label class="layui-form-label">
+                    <span class="x-red">*</span> 游戏
+                </label>
+                <div class="layui-input-block" >
+                    <span v-for="(item,k) in historyLinkItems" @click="insHistoryInfo(item,k)">
+                        <input type="radio" name="2" :value="k" :title="findLotteryName(k)" >
+                    </span>
+                </div>
+            </div>
+            <div class="layui-form-item" v-if="historyInfo.lotteryKey">
+                <div class="layui-input-block">
+                    <button class="layui-btn" @click="getLinkResultHistory()">获取</button>
+                </div>
+            </div>
+        </div>
+        <fieldset class="layui-elem-field" v-if="Object.keys(historyListItems).length>0">
+            <legend>{{findLotteryName(param.lotteryKey)}} 结果信息</legend>
+            <div class="layui-field-box">
+                <table class="layui-table" >
+                    <thead>
+                    <tr>
+                        <th scope="col" width="20%">期号</th>
+                        <th scope="col" width="20%">时间</th>
+                        <th scope="col">结果</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="item in historyListItems">
+                        <td>{{item.gameNo}}</td>
+                        <td>{{item.dateStr}}</td>
+                        <td>{{item.result}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+    </div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            linkItems: [],
+            lotteryItems: [],
+            historyLinkItems: [],
+            historyListItems: [],
+            historyInfo: [],
+            param: {
+                date:Format(new Date(),"yyyy-MM-dd"),
+                https:"",
+                lotteryKey:"",
+            },
+            httpItems:[
+                {http:'kai_168',url:"../json/http168history.json"},
+                {http:'kai_163',url:"../json/http163history.json"},
+                {http:'kai_bclc',url:"../json/httpbclchistory.json"},
+            ],
+        },
+        methods: {
+            findLinkName(k){
+                let name  = this.linkItems.find(v=>v.linkKey==k);
+                if(name){
+                    return name.linkName;
+                }
+                return null;
+            },
+            findLotteryName(k){
+                let name  = this.lotteryItems.find(v=>v.lotteryKey==k);
+                if(name){
+                    return name.lotteryName;
+                }
+                return null;
+            },
+            getLinkJson(g){
+                this.historyLinkItems = "";
+                if(g.url) {
+                    this.param.https = g.http;
+                    axios.get(g.url).then(res => {
+                        this.historyLinkItems = res.data;
+                    })
+                };
+            },
+            insHistoryInfo(g,key){
+                g.https = this.param.https;
+                g.date = this.param.date;
+                g.lotteryKey =  key;
+                this.historyInfo = g;
+            },
+            getLinkResultHistory() {
+                if(this.historyInfo.lotteryKey!='' && this.param.date != '' && this.param.https != ''){
+                    this.param.lotteryKey = this.historyInfo.lotteryKey;
+                    layer.load();
+                    this.historyListItems = [];
+                    axios.put('/link/history',this.historyInfo).then(res => {
+                        if(res.data.success){
+                            this.historyListItems = res.data.data;
+                        }else{
+                            layer.msg('获取失败了, 请重新获取吧!', {icon: 5,offset: 't'})
+                        }
+                        setTimeout(function(){
+                            layer.closeAll('loading');
+                        }, 1500);
+                    })
+                }else{
+                    layer.msg('请选择完整的参数!', {icon: 5,offset: 't'})
+                }
+            },
+        },
+        mounted() {
+            axios.get('/link/list')
+                .then(res => {
+                    this.linkItems = [];
+                    if(res.data.success){
+                        this.linkItems = res.data.data;
+                    }
+                });
+            axios.get('/link/lotlist')
+                .then(res => {
+                    this.lotteryItems = [];
+                    if(res.data.success){
+                        this.lotteryItems = res.data.data;
+                    }
+                })
+            let _this = this;
+            layui.use('laydate', function () {
+                let laydate = layui.laydate;
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#dateTime', //指定元素
+                    format: 'yyyy-MM-dd',// 设置显示格式
+                    done: value => { // 点击确认执行的回调函数，会把当前选择的时间传入进来
+                        // 把选择的时间赋值给先前定义好的变量，显示在页面
+                        _this.param.date = value;
+                        _this.historyInfo.date = value;
+                    }
+                });
+            });
+        },
+        updated(){
+            layui.use(['form'], function(){
+                let form = layui.form;
+                form.render();
+            })
+        },
+    })
+</script>

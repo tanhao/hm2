@@ -1,0 +1,29 @@
+{
+  "speed10": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=56&date=%s"
+  },
+  "jsssc": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=55&date=%s"
+  },
+  "xyft": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=38&date=%s"
+  },
+  "lucky5": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=31&date=%s"
+  },
+  "lucky10": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=33&date=%s"
+  },
+  "lucky8": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=32&date=%s"
+  },
+  "speed8": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=66&date=%s"
+  },
+  "sbspeed10": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=61&date=%s"
+  },
+  "lucky20": {
+    "url": "https://www.1632026.com/api/complex/selDataByGameIdAndDate?iGameId=34&date=%s"
+  }
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.smart.dao.SmartMapper">
+
+    <select id="selectCurrentGameNo" resultType="com.xzy.pojo.result.HmResult">
+        <![CDATA[
+        SELECT * FROM hm_ctrl.t_user_lottery ul,hm_order.hm_result hr
+        WHERE ul.user_id =  #{companyId} AND ul.lottery_id = hr.lottery_id AND hr.lottery_id = #{lotteryId}
+        AND UNIX_TIMESTAMP() > hr.open_time+ul.delay_open AND UNIX_TIMESTAMP()< hr.ACTION_TIME-ul.precede_close AND hr.account_day = #{accountDay}
+        and ul.is_open_self=1
+        ]]>
+    </select>
+
+    <select id="selectOddss"  resultType="String">
+        select GROUP_CONCAT(odds_id) oddss from hm_ctrl.t_odds where play_id =#{playId} and odds_key in
+        <foreach item="item" index="index" collection="oddsKeys" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="checkOrderWaiting"  resultType="Boolean">
+        select ifnull(max(if(status='WAITING',1,0)),0) from hm_order.hm_order where user_id=#{userId} and game_no=#{gameNo} and bet_source='smart'
+    </select>
+
+
+</mapper>

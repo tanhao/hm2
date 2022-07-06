@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserStatsMapper">
+
+    <select id="listUserStatsBOs" resultType="com.xzy.pojo.ctrl.bo.UserStatsBO">
+        select odds_id,
+            case #{buhuo} when 'SZ' then sum(sz_amt-bh_amt) when 'XZ' then sum(xz_amt) when 'BH' then sum(bh_amt) else 0 end bet_amt,
+            case #{buhuo} when 'SZ' then sum(profit_sz_amt-profit_bh_amt) when 'XZ' then sum(profit_xz_amt) when 'BH' then sum(profit_bh_amt) else 0 end profit_amt
+        from hm_order.hm_order_stats where user_id=#{userId} and  lottery_id=#{lotteryId} and game_no=#{gameNo} and find_in_set(market, #{markets})
+        group by odds_id
+    </select>
+
+
+    <select id="listUserStatsBOsGroupByLotteryId" resultType="com.xzy.pojo.ctrl.bo.UserStatsBO">
+        SELECT l.lottery_id,CASE #{buhuo} WHEN 'SZ' THEN sum(s.sz_amt-s.bh_amt) WHEN 'XZ' THEN sum(s.xz_amt) WHEN 'BH' THEN sum(s.bh_amt) ELSE 0 END betAmt
+        FROM (select * from t_user_lottery where user_id=#{companyId} and is_open_up=1) ul
+        LEFT JOIN t_lottery l ON ul.lottery_id=l.lottery_id
+        LEFT JOIN (
+            SELECT r.lottery_id,r.game_no,r.action_time,r.open_time
+            FROM hm_order.hm_result r
+            WHERE r.ACTION_TIME> UNIX_TIMESTAMP() AND <![CDATA[ r.open_time <=UNIX_TIMESTAMP() ]]>
+            AND r.ACCOUNT_DAY =DATE(DATE_ADD(NOW(), INTERVAL -7 HOUR))
+        ) AS r ON l.lottery_id=r.lottery_id
+        INNER JOIN  hm_order.hm_order_stats s ON s.user_id=#{userId} and s.lottery_id=l.lottery_id and s.game_no=r.game_no AND find_in_set(s.market,#{markets})
+        GROUP BY lottery_id
+    </select>
+
+    <select id="getTodayWinLose"  resultType="Double">
+        SELECT hm_order.FUN_GET_USER_WIN_LOSE(#{userId},hm_order.FUN_GET_ACCOUNT_DAY()) win_amt
+    </select>
+
+
+
+
+</mapper>

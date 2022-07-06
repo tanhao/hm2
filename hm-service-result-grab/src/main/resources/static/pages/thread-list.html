@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="x-body">
+        <blockquote class="layui-elem-quote">
+            <button class="layui-btn layui-btn-small" @click="linkThreadStatusList()">{{refreshTime}}刷新</button>
+        </blockquote>
+        <fieldset class="layui-elem-field" >
+            <legend> 运行线程信息</legend>
+            <div class="layui-field-box" >
+                <table class="layui-table" >
+                    <tbody v-for="childItems,k1 in statusChildItems">
+                    <tr>
+                        <td style="width: 6%">
+                            {{findLinkName(k1)}}
+                        </td>
+                        <td>
+                            <table>
+                                <tr v-if="k1=='kai_168'">
+                                   <th style="width: 10%">彩种</th>
+                                   <th style="width: 25%;text-align: center" v-for="ip in ipItems">{{ip}}<br/>{{findLinkName(ip)}}</th>
+                                   <th></th>
+                                </tr>
+                                <tbody v-for="items,key in childItems" >
+                                <tr >
+                                    <td style="width: 10%">
+                                        {{findLotteryName(key)}}
+                                    </td>
+                                    <td style="width: 25%;" v-for="ip in ipItems">
+                                        <div v-for="ite in items" v-if="ip==ite.ipKey">
+                                            <span><a href="#1" style="color: blue"  @click="openLinkNewResultList(k1,key,ip)">{{findOneDayTime(key,k1,ip)}}</a></span>
+                                            <span v-if="ite.status==1" style="color: green">已运行</span>
+                                            <span v-if="ite.status==3" style="color: green">重启中..</span>
+                                            <span v-if="ite.status==0" style="color: red">停用中..</span>
+                                            <span v-if="ite.status==2" style="color: red">已停用</span>
+                                            <span v-if="ite.status==4" style="color: red">出现异常..</span>
+                                            <!--<span v-if="ite.status==5" style="color: green">自动重启中..</span>-->
+                                            &nbsp;|&nbsp;
+                                            <span v-if="ite.status==1" class="layui-btn layui-btn-warm layui-btn-mini" @click="changeThreadStatus(ite,k1,key,0)">停用</span>
+                                            <span v-if="ite.status==0 ||ite.status==2 || ite.status==4" class="layui-btn layui-btn-normal layui-btn-mini" @click="changeThreadStatus(ite,k1,key,3)">启用</span>
+                                            <!--<span v-if="ite.status!=0 && ite.status!=2 && ite.status!=5" class="layui-btn layui-btn-normal layui-btn-mini" @click="changeThreadStatus(ite,k1,key,5)">自动重启</span>-->
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+
+        <form class="layui-form" id="linkNewResult" style="display:none;margin: 30px;">
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th width="6%">网址</th>
+                    <th width="10%">游戏</th>
+                    <th width="10%">期数</th>
+                    <th width="15%">开奖时间</th>
+                    <th width="15%">获取时间</th>
+                    <th width="12%">获取IP</th>
+                    <th width="6%">用时</th>
+                    <th>结果</th>
+                </tr>
+                </thead>
+                <tbody  >
+                <tr v-for="item in resultItems">
+                    <td>{{findLinkName(item.https)}}</td>
+                    <td>{{findLotteryName(item.lotteryKey)}}</td>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTime}}</td>
+                    <td>{{item.dayTime}}</td>
+                    <td>{{item.createIp}}</td>
+                    <td>{{item.secondTime}}s</td>
+                    <td>{{item.result}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            username: sessionStorage.getItem("user"),
+            linkItems: [],
+            statusItems: [],
+            statusChildItems: [],
+            lotteryItems: [],
+            timer: null,
+            refreshTime: 10,
+            resultItems: [],
+            ipItems: [],
+            newResultLinkInit:[]
+        },
+        methods: {
+            findLinkName(k){
+                let name  = this.linkItems.find(v=>v.linkKey==k);
+                if(name){
+                    return name.linkName;
+                }
+                return k;
+            },
+            findLotteryName(k){
+                let name  = this.lotteryItems.find(v=>v.lotteryKey==k);
+                if(name){
+                    return name.lotteryName;
+                }
+                if(k=='idc_2') return "地方彩";
+                if(k=='idc_3') return "境外彩";
+                return k;
+            },
+            findOneDayTime(key,https,ip){
+                let item = this.newResultLinkInit.find(v=>v.lotteryKey == key && v.https == https&& v.createIp == ip);
+                if(item){
+                    return item.dayTime;
+                }
+                return "";
+            },
+            async linkThreadStatusList() {
+                let res = await axios.get('/thread/list');
+                this.statusChildItems = [];
+                if(res.data.success){
+                    this.statusChildItems = res.data.data.newMap;
+                    this.ipItems = res.data.data.ips;
+                }
+            },
+            async linkNewResultLinkOne() {
+                let res = await axios.get('/link/latest/results');
+                this.newResultLinkInit = [];
+                if(res.data.success){
+                    this.newResultLinkInit = res.data.data.newList;
+                }
+            },
+            changeThreadStatus(ite,link,lotteryKey,status){
+                let param = {
+                    status:status,
+                    link:link,
+                    lotteryKey:lotteryKey,
+                    ip:ite.ipKey
+                }
+                ite.status = status;
+                axios.put("/thread/change",param).then(res => {
+                    if(res.data.success){
+                        this.linkThreadStatusList();
+                    }
+                })
+            },
+            refreshList() {
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    this.refreshTime -= 1;
+                    if (this.refreshTime == 0) {
+                        this.linkThreadStatusList();
+                        this.linkNewResultLinkOne();
+                        this.refreshTime = 10;
+                    }
+                }, 1200);
+            },
+            openLinkNewResultList(link,key,ip){
+                axios.get("/link/new/"+link+"/"+key+"/"+ip).then(res => {
+                    if(res.data.success){
+                        this.resultItems = res.data.data.newList;
+                    }
+                })
+                layer.open({
+                    type:1,
+                    area:['1300px','700px'],
+                    title: '最新10期结果',
+                    content: $("#linkNewResult"),
+                    shade: 0,
+                    btn: []
+                    ,btn1: function(index, layero){
+
+                    },
+                    cancel: function(layero,index){
+                        layer.closeAll();
+                    }
+                });
+            }
+        },
+        mounted() {
+            axios.get('/link/list')
+                .then(res => {
+                    if(res.data.success){
+                        this.linkItems = res.data.data;
+                    }
+                });
+            axios.get('/link/lotlist')
+                .then(res => {
+                    if(res.data.success){
+                        this.lotteryItems = res.data.data;
+                    }
+                })
+            this.linkThreadStatusList();
+            this.linkNewResultLinkOne();
+            this.refreshList();
+        },
+        destroyed() {
+            clearInterval(this.timer);
+        },
+    })
+</script>

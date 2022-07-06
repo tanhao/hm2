@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body>
+<div id="app">
+    <div class="x-body">
+        <div class="layui-form" >
+            <div class="layui-input-inline">
+                <input class="layui-input" placeholder="选择日期" name="dateTime" id="dateTime" v-model="dateStr">
+            </div>
+
+            <div class="layui-input-inline">
+                <button class="layui-btn layui-btn-small" @click="getResultLogList(dateStr)">刷新</button>
+            </div>
+
+        </div>
+
+        <table class="layui-table" >
+            <thead>
+            <tr>
+                <th width="10%">日志类型</th>
+                <th >操作</th>
+                <th width="10%">修改人</th>
+                <th width="25%">修改时间</th>
+            </tr>
+            </thead>
+            <tbody  v-for="(item,j) in resultInitItems">
+            <tr>
+                <td>{{item.type}}</td>
+                <td>{{item.vold}} >>
+                    <span v-if="item.type=='添加赛果'" >
+                       游戏： {{getSplitStr(item.vnew)[0]}} ，
+                       期号： {{getSplitStr(item.vnew)[1]}} ，
+                       结果： {{getSplitStr(item.vnew)[2]}}
+                    </span>
+                    <span v-else >{{item.vnew}}</span></td>
+                <td>{{item.updateBy}}
+                <td>{{item.updateTime}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            resultInitItems: [],
+            dateStr:Format(new Date(),"yyyy-MM-dd"),
+            linkItems:[],
+        },
+        methods: {
+            getSplitStr(k) {
+                return k.split("_");
+            },
+            getResultLogList(d) {
+                if(d){
+                    this.dateStr = d;
+                }
+                this.resultInitItems = [];
+                axios.get("/log/list/"+this.dateStr).then(res => {
+                    if(res.data.success) {
+                        this.resultInitItems = res.data.data;
+                    }
+                })
+            },
+            findLinkName(k){
+                let name  = this.linkItems.find(v=>v.linkKey==k);
+                if(name){
+                    return name.linkName;
+                }
+                return k;
+            },
+        },
+        mounted() {
+            let _this = this;
+            axios.get('/link/list')
+                .then(res => {
+                    _this.linkItems = [];
+                    if(res.data.success){
+                        _this.linkItems = res.data.data;
+                    }
+                });
+            _this.getResultLogList(_this.dateStr)
+            //初始化加载
+            layui.use('laydate', function () {
+                let laydate = layui.laydate;
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#dateTime', //指定元素
+                    format: 'yyyy-MM-dd',// 设置显示格式
+                    done: value => { // 点击确认执行的回调函数，会把当前选择的时间传入进来
+                        // 把选择的时间赋值给先前定义好的变量，显示在页面
+                        if(value){
+                            _this.dateStr = value;
+                            _this.getResultLogList(_this.dateStr);
+                        }
+                    }
+                });
+            });
+        },
+        updated(){
+            let _this = this;
+            layui.use(['form'], function(){
+                let form = layui.form;
+                form.on('select(selectKey)', function(data){
+                    layer.load();
+                    _this.getResultLogList(data.value);
+                });
+                form.render();
+            })
+            layui.use("layer",function(){})
+        },
+    })
+</script>

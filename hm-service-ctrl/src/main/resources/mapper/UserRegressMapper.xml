@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserRegressMapper">
+
+    <!-- 取后桶的退水 -->
+    <select id="listHoutongRegress"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            20 base_regress_a,20 base_regress_b,20 base_regress_c,20 base_regress_d,
+            l.max_bet,l.max_period,999999999 base_max_bet,999999999 base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r,t_user_limit l
+        WHERE  l.lottery_id=r.lottery_id   and l.user_id=r.user_id and l.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+    </select>
+
+    <!-- 取公司的退水 -->
+    <select id="listCompanyRegress"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            20 base_regress_a,20 base_regress_b,20 base_regress_c,20 base_regress_d,
+            l.max_bet,l.max_period,999999999 base_max_bet,999999999 base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r,t_user_limit l
+        WHERE  l.lottery_id=r.lottery_id   and l.user_id=r.user_id and l.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+    </select>
+
+    <!-- 取一级非标准用户的退水（赔率退水在同一个页面时） -->
+    <select id="listAgent1RegressUnstandard2"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            20 base_regress_a,20 base_regress_b,20 base_regress_c,20 base_regress_d,
+            l.max_bet,l.max_period,ul.max_bet base_max_bet,ul.max_period base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r
+        LEFT JOIN t_user_limit l ON l.lottery_id=r.lottery_id and l.user_id=r.user_id and l.kind_id=r.kind_id
+        INNER JOIN (select * from hm_manage.hm_user where user_id=#{userId}) u
+        LEFT JOIN t_user_limit  ul ON ul.user_id=u.parent_id and ul.lottery_id=r.lottery_id and ul.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+    </select>
+
+    <!-- 取一级非标准用户的退水 -->
+    <select id="listAgent1RegressUnstandard"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        <!--
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            b.regress_a base_regress_a,b.regress_b base_regress_b,b.regress_c base_regress_c,b.regress_d base_regress_d,
+            ifnull(t.regress_a,0) tmr_regress_a,
+            ifnull(t.regress_b,0) tmr_regress_b,
+            ifnull(t.regress_c,0) tmr_regress_c,
+            ifnull(t.regress_d,0) tmr_regress_d,
+            l.max_bet,l.max_period,ul.max_bet base_max_bet,ul.max_period base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r
+        LEFT JOIN (select * from t_user_regress_tmr where user_id=#{userId}) t ON t.lottery_id=r.lottery_id and t.user_id=r.user_id and t.kind_id=r.kind_id
+        LEFT JOIN t_user_limit l ON l.user_id=r.user_id and l.lottery_id=r.lottery_id and l.kind_id=r.kind_id
+        INNER JOIN (select * from hm_manage.hm_user where user_id=#{userId}) u
+        LEFT JOIN t_user_limit  ul ON ul.user_id=u.parent_id and ul.lottery_id=r.lottery_id and ul.kind_id=r.kind_id
+        LEFT JOIN (
+            select fo.lottery_id,c.kind_id,
+                floor( min(100 - o.odds_a*100/fo.odds)*100 )/100 regress_a,
+                floor( min(100 - o.odds_b*100/fo.odds)*100 )/100 regress_b,
+                floor( min(100 - o.odds_c*100/fo.odds)*100 )/100 regress_c,
+                floor( min(100 - o.odds_d*100/fo.odds)*100 )/100 regress_d
+            from (select * from t_user_fullodds where user_id=#{parentId}) fo
+            left join t_user_odds o on o.user_id=#{userId} and o.lottery_id=fo.lottery_id and o.category_id=fo.category_id
+            left join t_category c on c.category_id=o.category_id
+            group by fo.lottery_id,c.kind_id
+        ) b ON b.lottery_id=r.lottery_id and b.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+        -->
+
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            20 base_regress_a,20 base_regress_b,20 base_regress_c,20 base_regress_d,
+            ifnull(t.regress_a,0) tmr_regress_a,
+            ifnull(t.regress_b,0) tmr_regress_b,
+            ifnull(t.regress_c,0) tmr_regress_c,
+            ifnull(t.regress_d,0) tmr_regress_d,
+            l.max_bet,l.max_period,ul.max_bet base_max_bet,ul.max_period base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r
+        LEFT JOIN (select * from t_user_regress_tmr where user_id=#{userId}) t ON t.lottery_id=r.lottery_id and t.user_id=r.user_id and t.kind_id=r.kind_id
+        LEFT JOIN t_user_limit l ON l.user_id=r.user_id and l.lottery_id=r.lottery_id and l.kind_id=r.kind_id
+        INNER JOIN (select * from hm_manage.hm_user where user_id=#{userId}) u
+        LEFT JOIN t_user_limit  ul ON ul.user_id=u.parent_id and ul.lottery_id=r.lottery_id and ul.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+    </select>
+
+    <!-- 取一级标准用户的退水 -->
+    <select id="listAgent1RegressStandard"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        SELECT r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            ur.regress_a base_regress_a,
+            ur.regress_b base_regress_b,
+            ur.regress_c base_regress_c,
+            ur.regress_d base_regress_d,
+            ifnull(t.regress_a,0) tmr_regress_a,
+            ifnull(t.regress_b,0) tmr_regress_b,
+            ifnull(t.regress_c,0) tmr_regress_c,
+            ifnull(t.regress_d,0) tmr_regress_d,
+            l.max_bet,l.max_period,ul.max_bet base_max_bet,ul.max_period base_max_period
+        FROM (select * from t_user_regress where user_id=#{userId}) r
+        LEFT JOIN (select * from t_user_regress_tmr where user_id=#{userId}) t ON t.lottery_id=r.lottery_id and t.user_id=r.user_id and t.kind_id=r.kind_id
+        LEFT JOIN t_user_limit l ON l.user_id=r.user_id and l.lottery_id=r.lottery_id and l.kind_id=r.kind_id
+        INNER JOIN (select * from hm_manage.hm_user where user_id=#{userId}) u
+        LEFT JOIN t_user_regress  ur ON ur.user_id=u.parent_id and ur.lottery_id=r.lottery_id and ur.kind_id=r.kind_id
+        LEFT JOIN t_user_limit  ul ON ul.user_id=u.parent_id and ul.lottery_id=r.lottery_id and ul.kind_id=r.kind_id
+        ORDER BY r.lottery_id,r.kind_id
+    </select>
+
+
+    <!-- 取二级，三级...十级的退水 -->
+    <select id="listAgent2ToAgent10Regress"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        select
+            r.lottery_id,r.kind_id,
+            r.regress_a,r.regress_b,r.regress_c,r.regress_d,
+            l.max_bet,l.max_period
+        from
+        (
+            select r.user_id,r.lottery_id,r.kind_id,
+            sum(regress_a) regress_a,sum(regress_b) regress_b,sum(regress_c) regress_c,sum(regress_d) regress_d
+            from t_user_regress r,
+                (
+                    select user_id from hm_manage.hm_user where user_level>2
+                    and  FIND_IN_SET(user_id,(select CONCAT(parent_path,#{userId},',') from hm_manage.hm_user where user_id=#{userId} ))
+                )u
+            where r.user_id=u.user_id
+            group by r.lottery_id,r.kind_id
+        ) r
+        inner join t_user_limit l on l.lottery_id=r.lottery_id and l.kind_id=r.kind_id and l.user_id=r.user_id
+        order by r.lottery_id,r.kind_id
+    </select>
+
+    <select id="listZhuanRegress"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserRegressBO">
+        select x.lottery_id,x.kind_id,
+            GREATEST(0,x.base_regress_a) base_regress_a,
+            GREATEST(0,x.base_regress_b) base_regress_b,
+            GREATEST(0,x.base_regress_c) base_regress_c,
+            GREATEST(0,x.base_regress_d) base_regress_d,
+            GREATEST(0,x.base_regress_a+IFNULL(r.regress_a,0)) regress_a,
+            GREATEST(0,x.base_regress_b+IFNULL(r.regress_b,0)) regress_b,
+            GREATEST(0,x.base_regress_c+IFNULL(r.regress_c,0)) regress_c,
+            GREATEST(0,x.base_regress_d+IFNULL(r.regress_d,0)) regress_d,
+            IF(t.regress_a is null,0, GREATEST(0,x.base_regress_a+t.regress_a) ) tmr_regress_a,
+            IF(t.regress_b is null,0, GREATEST(0,x.base_regress_b+t.regress_b) ) tmr_regress_b,
+            IF(t.regress_c is null,0, GREATEST(0,x.base_regress_c+t.regress_c) ) tmr_regress_c,
+            IF(t.regress_d is null,0, GREATEST(0,x.base_regress_d+t.regress_d) ) tmr_regress_d,
+            l.max_bet,l.max_period,ul.max_bet base_max_bet,ul.max_period base_max_period
+        from
+        (
+            select r.lottery_id,r.kind_id,
+                sum(regress_a) base_regress_a,sum(regress_b) base_regress_b,sum(regress_c) base_regress_c,sum(regress_d) base_regress_d
+            from t_user_regress r,( select user_id from hm_manage.hm_user where user_level>2 and FIND_IN_SET(user_id,(select parent_path from hm_manage.hm_user where user_id=#{userId})) ) u
+            where r.user_id=u.user_id
+            group by r.lottery_id,r.kind_id
+        ) x
+        LEFT JOIN (select * from t_user_regress where user_id=#{userId}) r on r.lottery_id=x.lottery_id and r.kind_id=x.kind_id
+        LEFT JOIN (select * from t_user_regress_tmr where user_id=#{userId}) t ON t.lottery_id=x.lottery_id  and t.kind_id=x.kind_id
+        INNER JOIN (select * from hm_manage.hm_user where user_id=#{userId}) u
+        LEFT JOIN t_user_limit l ON l.user_id=u.user_id and l.lottery_id=x.lottery_id and l.kind_id=x.kind_id
+        LEFT JOIN t_user_limit  ul ON ul.user_id=u.parent_id and ul.lottery_id=x.lottery_id and ul.kind_id=x.kind_id
+        order by x.lottery_id,x.kind_id
+    </select>
+
+
+    <!--赚水-->
+    <select id="updateZhuanRegress" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_ZHUAN_REGRESS(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+</mapper>

@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <!--<meta http-equiv="pragma" CONTENT="no-cache">
+  <meta http-equiv="Cache-Control" CONTENT="no-store, must-revalidate">
+  <meta http-equiv="expires" content="0">
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />-->
+  <meta name="HandheldFriendly" content="true">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no, shrink-to-fit=no" />
+  <!--<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">-->
+  <!--<meta name="browsermode" content="application">
+  <meta name="screen-orientation" content="portrait">
+  <meta name="full-screen" content="yes">
+  <meta name="wap-font-scale" content="no">
+  <meta name="nightmode" content="disable">
+  <meta name="imagemode" content="force">
+  <meta name="x5-page-mode" content="app">
+  <meta name="x5-orientation" content="portrait">
+  <meta name="x5-fullscreen" content="true">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" href="favicon.ico">-->
+  <title>H5</title>
+  <!--<script src="//cdn.jsdelivr.net/npm/eruda"></script>
+
+  <script>
+    eruda.init();
+    console.log('控制台打印信息');
+  </script>-->
+</head>
+<body onload="onLoad()">
+<div id="app"></div>
+<!-- built files will be auto injected -->
+<script type="text/javascript" charset="utf-8">
+  window.onload=function () {
+    document.addEventListener('touchstart',function (event) {
+      if(event.touches.length>1){
+        event.preventDefault();
+      }
+    });
+    var lastTouchEnd=0;
+    document.addEventListener('touchend',function (event) {
+      var now=(new Date()).getTime();
+      if(now-lastTouchEnd<=300){
+        event.preventDefault();
+      }
+      lastTouchEnd=now;
+    },false);
+    document.addEventListener('gesturestart', function (event) {
+      event.preventDefault();
+    });
+  }
+</script>
+<!-- <script src="cordova.js"></script>-->
+</body>
+</html>

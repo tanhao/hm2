@@ -1,0 +1,486 @@
+#idc {
+
+}
+
+#idc .kifISk {
+  width: calc(100% - 50px);
+}
+
+#idc .top {
+  background: #CD3C29;
+}
+
+#idc .gLhExP .sidebar-header {
+  background: transparent;
+}
+
+#idc .hSRnbX {
+  width: 175px;
+  right: 0px;
+  -webkit-transition: all 500ms ease;
+  -o-transition: all 500ms ease;
+  box-shadow: 0 2px 5px #ccc inset;
+  -moz-box-shadow: 0 2px 5px #ccc inset;
+  -o-box-shadow: 0 2px 5px #ccc inset;
+  -ms-box-shadow: 0 2px 5px #ccc inset;
+  -webkit-box-shadow: 3px 3px 5px #510505 inset;
+  background-color: #510505;
+  background: -moz-linear-gradient(top, #cd3c29 0%, #510505 100%);
+  background: -webkit-linear-gradient(top, #cd3c29 0%, #510505 100%);
+  background: -o-linear-gradient(top, #cd3c29 0%, #510505 100%);
+  background: -ms-linear-gradient(top, #cd3c29 0%, #510505 100%);
+  background: linear-gradient(to left, #cd3c29 0%, #510505 100%);
+  -pie-background: linear-gradient(#cd3c29, #510505);
+}
+
+#idc .gLhExP .sidebar-header {
+  height: 100px;
+  padding: 25px 0;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item {
+  margin-bottom: 1px;
+  background: rgba(255, 255, 255, .1);
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-title {
+  font-weight: 700;
+  color: #fff !important;
+  font-size: 1rem;
+  position: relative;
+  text-shadow: initial;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item:not(:last-child) {
+  border-bottom: none;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon {
+  background: url(../../../images/leftico.png);
+  background-size: 457px 30px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon1 {
+
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon2 {
+  background-position: -31px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon3 {
+  background-position: -61px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon4 {
+  background-position: -91px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon5 {
+  background-position: -122px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon6 {
+  background-position: -153px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon7 {
+  background-position: -183px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon8 {
+  background-position: -214px 0px;
+}
+
+#idc .gLhExP .sidebar-content .sidebar-item .sidebar-item-icon.mtd_icon9 {
+  background-position: -244px 0px;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.PK10JSC {
+  background: url(../../../images/ball/jssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.BJPK10 {
+  background: url(../../../images/ball/pk10.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.HMPK10 {
+  background: url(../../../images/ball/pk10.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.SSCJSC {
+  background: url(../../../images/ball/jsssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.CQSSC {
+  background: url(../../../images/ball/cqssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.LUCKYSB {
+  background: url(../../../images/ball/jsft.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.XJSSC {
+  background: url(../../../images/ball/xjssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.LUCKY5 {
+  background: url(../../../images/ball/azxy5.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.HK6 {
+  background: url(../../../images/ball/lhc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.F3D {
+  background: url(../../../images/ball/3d.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.PL3 {
+  background: url(../../../images/ball/pl3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.cqsf {
+  background: url(../../../images/ball/cqsf.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.BJKL8 {
+  background: url(../../../images/ball/kl8.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.GXK3 {
+  background: url(../../../images/ball/gxk3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.TJSSC {
+  background: url(../../../images/ball/tjssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.GD11X5 {
+  background: url(../../../images/ball/gd11x5.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.JLK3 {
+  background: url(../../../images/ball/jlk3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.LUCKY8 {
+  background: url(../../../images/ball/azxy8.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.LUCKY10 {
+  background: url(../../../images/ball/azxy10.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.LUCKY20 {
+  background: url(../../../images/ball/azxy20.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.PCEGG {
+  background: url(../../../images/ball/pcdd.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.JND28 {
+  background: url(../../../images/ball/jnd28.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.pcdd {
+  background: url(../../../images/ball/jspcdd.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.lfssc {
+  background: url(../../../images/ball/lfssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.wfssc {
+  background: url(../../../images/ball/wfssc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.gdsf {
+  background: url(../../../images/ball/gdsf.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.GXKL10 {
+  background: url(../../../images/ball/gxklsf.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.jsk3 {
+  background: url(../../../images/ball/jsk3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.js3 {
+  background: url(../../../images/ball/js3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.fjk3 {
+  background: url(../../../images/ball/fjk3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.shk3 {
+  background: url(../../../images/ball/shk3.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.jslhc {
+  background: url(../../../images/ball/jslhc.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list .lottery-item.xyft {
+  background: url(../../../images/ball/xyft.png) center 20% no-repeat;
+  background-size: auto 70%;
+}
+
+#idc .OQRyf .scroll-wrapper-home {
+  padding-bottom: constant(safe-area-inset-bottom) !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  overflow-y: scroll !important;
+  -webkit-overflow-scrolling: touch !important;
+  height: calc(100vh - 135px) !important;
+}
+
+#idc .OQRyf {
+  height: 100%;
+}
+
+#idc .win_info {
+  margin-bottom: 20px;
+  height: 100%;
+}
+
+#idc .gLhExP {
+  width: 175px;
+}
+
+
+#idc #numbers, #idc #open_qihao {
+  font-weight: normal !important;
+}
+
+#idc .setbetright {
+  height: calc(100% - 205px);
+  /*height: 100%;*/
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#idc .otherpage {
+  height: calc(100% - 20px) !important;
+}
+
+#idc .OQRyf .scroll-wrapper-home .lottery-list {
+  margin-bottom: 70px;
+}
+
+#idc .irDTzN .draw {
+  width: 31%;
+}
+
+.idc #idc {
+  height: 100%;
+}
+
+#idc .foottxt {
+  width: 100%;
+  line-height: 20px;
+  background: #ebebeb;
+  bottom: 0;
+  position: fixed;
+  height: 20px;
+  display: table;
+}
+
+#idc .TfWBC .draw {
+  min-width: 100px;
+  width: 32%;
+}
+
+#idc .irDTzN {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#idc .TfWBC {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top: 1px dashed #fc9b88;
+}
+
+#idc .TfWBC .timer-wrapper .open span {
+  color: initial;
+}
+
+#idc .TfWBC .timer-wrapper .open {
+  margin-right: 0px;
+}
+
+#idc .TfWBC .timer-wrapper {
+  float: right;
+  flex-grow: 0;
+}
+
+#idc .TfWBC .timer-wrapper .close, #idc .TfWBC .timer-wrapper .open {
+  min-width: 95px;
+  font-size: 15px;
+  margin-top: 2px;
+  text-align: left;
+
+}
+
+#idc .innVmp {
+  width: auto;
+}
+
+#idc .csoFvQ .pk10 div[class^="n_"], #idc .csoFvQ .ssc div[class^="n_"], #idc .csoFvQ .klsf div[class^="n_"], #idc .csoFvQ .gd11x5 div[class^="n_"], #idc .csoFvQ .gxkl10 div[class^="n_"] {
+  margin: 0 auto !important;
+}
+
+#idc .bTnXwf {
+  height: 100%;
+  display: table;
+  -webkit-margin-bottom-collapse: 90px;
+  /*margin-bottom: 90px;*/
+  width: 100%;
+}
+
+#idc .bTnXwf .bet-panel-wrapper .bet-panel-header {
+  text-shadow: initial;
+  color: #cd3c29;
+  font-weight: bold;
+  background-color: #facba1;
+  line-height: 25px;
+  height: 25px;
+  text-align: center;
+  font-size: 14px;
+  position: relative;
+}
+
+#idc .bTnXwf .bet-panel-wrapper {
+  padding: 0px;
+}
+
+.idc .gm_main {
+  height: calc(100% - 40px);
+}
+
+#idc .gm_main .wrap .tz_box .wf_box {
+  border: 1px solid #deaf85;
+}
+
+#idc .pagerPage {
+  background-color: #fff;
+  text-align: center;
+  height: 22px;
+  line-height: 22px;
+}
+
+#idc .rough_lines {
+
+}
+
+.mint-msgbox {
+  width: 270px !important;
+  border-radius: 15px !important;
+}
+
+.mint-msgbox-btn {
+  font-size: 16px !important;
+}
+
+.v-modal {
+  opacity: 0.8 !important;
+}
+
+.mint-msgbox-cancel {
+  border-right: 1px solid #ddd;
+}
+
+#idc .k3 .n_1, #idc .k3 .n_2, #idc .k3 .n_3, #idc .k3 .n_4, #idc .k3 .n_5, #idc .k3 .n_6 {
+  zoom: .8;
+  margin-top: 4px;
+  margin-right: 0px !important;
+}
+
+#idc .k3 .p_1, #idc .k3 .p_2, #idc .k3 .p_3, #idc .k3 .p_4, #idc .k3 .p_5, #idc .k3 .p_6 {
+  zoom: .8;
+  margin-top: 4px;
+  margin-right: 0px !important;
+}
+
+#idc .setbetright .idcset {
+  height: 40px;
+  display: flex;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  background-color: rgb(255, 255, 255);
+}
+
+#idc .setbetright .jspcdd .setlist {
+  width: 100%;
+  position: static;
+}
+
+#idc .bcn_back {
+  background: #fff70e;
+}
+
+#idc .bcn_back .qiu {
+  color: #666 !important;
+}
+
+#idc .klsf em {
+  position: relative;
+  top: -3px;
+}
+
+#idc .bcn_back .odds {
+  color: red !important;
+}
+
+#idc .setbetright .jspcdd .col3 {
+  float: left;
+  -webkit-flex: 3;
+  -ms-flex: 3;
+  flex: 3;
+  display: flex;
+  width: 30%;
+}
+.cs_image {
+  background: url(../../../../assets/cs.jpg);
+}
+
+#idc .line-through table tr td{
+  color: #0f0f0f;
+  background-color: #d0d0d0;
+}
+

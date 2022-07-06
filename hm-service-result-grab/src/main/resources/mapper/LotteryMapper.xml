@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.LotteryMapper">
+
+    <select id="selectByAllList" resultType="com.xzy.result.vo.LotteryVo">
+        SELECT * FROM t_lottery tl,t_lot_sort tls
+        WHERE tl.lottery_id = tls.lottery_id
+        AND tl.by_open=1
+        ORDER BY hot_sort
+    </select>
+
+  <update id="updateLotterySort" parameterType="com.xzy.result.vo.LotteryVo">
+        update t_lot_sort set hot_sort = #{hotSort},hot_chk = #{hotChk}
+        where lottery_id = #{lotteryId}
+    </update>
+
+
+
+</mapper>

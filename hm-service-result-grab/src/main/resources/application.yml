@@ -1,0 +1,26 @@
+server:
+  port: 23330
+
+spring:
+  profiles:
+    active: dev
+  resources:
+    static-locations: classpath:/static/
+  devtools:
+    restart:
+      enabled: false
+  task:
+    scheduling:
+      pool:
+        size: 200
+
+rocketmq:
+  instanceId: MQ_INST_1909372837772581_BXTxIdTf
+  accessKey: LTAI4G34pC5HsHAgenpsL8Af
+  secretKey: fqDLhSNgBzAaNBPwARJgzE9N6pYmc0
+  nameSrvAddr: http://MQ_INST_1909372837772581_BXUj2nAP.mq-internet-access.mq-internet.aliyuncs.com:80
+  httpSrvAddr: http://1909372837772581.mqrest.cn-hongkong.aliyuncs.com
+  topicResult: topic_result
+  groupResult: GID_result
+
+ipadds: ${IPADDS:127.0.0.1}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserMaxdiffMapper">
+
+    <select id="listUserMaxdiffDOs" resultType="com.xzy.pojo.ctrl.bo.UserMaxdiffBO">
+        select m.*,m.maxdiff min_maxdiff,c.max_diff max_maxdiff
+        from (select * from t_user_maxdiff where user_id=#{userId}) m
+        left join t_category c on   c.category_id=m.category_id
+    </select>
+
+    <!--公司改一级限注-->
+    <select id="updateCompanyMaxdiff" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.MaxdiffRQ">
+        {
+            CALL SP_UPDATE_COMPANY_MAXDIFF(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+</mapper>

@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://114.112.240.53:3306/hm_order
+    username: hm2
+    password: aa123456
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20
+      connection-timeout: 5000
+      idle-timeout: 60000
+      max-lifetime: 60000
+  redis:
+    database: 6
+    host: 103.244.55.58
+    port: 6379
+    password: hm@123456
+    timeout: 5000 #连接超时 毫秒
+    jedis:
+      pool:
+        max-active: 100
+        max-idle: 10
+        max-wait: 10000 #连接池最大等行时间 -1没有限制
+  cloud:
+    nacos:
+      discovery:
+        namespace: 73f1cfcc-eedc-4e40-83b3-f1f3db148387
+        server-addr: ${nacos.server-addr}
+        metadata:
+          group: discovery-gray-group
+          version: 1.0
+          region: ${nacos.region}
+dubbo:
+  scan:
+    base-packages: com.xzy.user.service.impl
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: spring-cloud://localhost
+  cloud:
+    subscribed-services: hm2-service-result-receive,hm2-websocket
+  provider:
+    filter: -exception
+  consumer:
+    check: false
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true  #驼峰命名
+    default-fetch-size: 5000
+
+nacos:
+  server-addr: 43.252.170.248:8848
+  region: ${spring.profiles.active}
+
+
+rocketmq:
+    groupResult: GID_result

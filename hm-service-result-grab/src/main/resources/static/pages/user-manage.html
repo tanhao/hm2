@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body >
+<div id="app">
+    <div class="x-body">
+        <blockquote class="layui-elem-quote">
+            <button class="layui-btn layui-btn-small" @click="openUpdateOrSave(0)">添加用户</button>
+        </blockquote>
+        <table class="layui-table" >
+                <thead>
+                <tr>
+                    <th scope="col" width="20%">用户名</th>
+                    <th scope="col" width="10%">等级</th>
+                    <th scope="col" width="20%">操作</th>
+                    <th scope="col" width="50%"> </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="item in userItems">
+                    <td>{{item.userName}}</td>
+                    <td>{{item.userLvl}}</td>
+                    <td>
+                        <button class="layui-btn layui-btn-small layui-btn-danger" @click="deleteUser()">删除</button>
+                        <button class="layui-btn layui-btn-small layui-btn-normal" @click="openUpdateOrSave(1,item)">修改</button>
+                    </td>
+                    <td> </td>
+                </tr>
+                </tbody>
+            </table>
+        <form class="layui-form" id="showModel" style="display:none;margin-top: 20px">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="x-red">*</span> 用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="username" lay-verify="required" lay-reqtext="请输入用户名，不能为空 " class="layui-input" v-model="param.userName">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="x-red">*</span> 等级</label>
+                <div class="layui-input-inline">
+                    <input type="number" name="level" required lay-verify="required" lay-reqtext="请输入等级，不能为空 " class="layui-input" v-model="param.userLvl">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><span class="x-red">*</span> 密码</label>
+                <div class="layui-input-inline">
+                    <input v-if="modelType==0" type="text" name="password" required lay-verify="required" lay-reqtext="请输入密码，不能为空 " class="layui-input" v-model="param.userPwd">
+                    <input v-if="modelType==1" type="password" name="password" required lay-verify="required" lay-reqtext="请输入密码，不能为空 " class="layui-input" v-model="param.userPwd">
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            userItems:[],
+            param: {
+                userName:"",
+                userPwd:"123456",
+                userLvl:1
+            },
+            modelType:"",
+            layer:"",
+        },
+        methods: {
+            getUserList(){
+                axios.get("/user/list").then(res => {
+                    if(res.data.success) {
+                        this.userItems = res.data.data;
+                    }
+                })
+            },
+            saveUser(){
+                this.param.userLvl = 0+this.param.userLvl*1;
+                if(this.param.userName!='' && this.param.userPwd != ''){
+                    axios.post("/user/change",this.param).then(res => {
+                        if(res.data.success){
+                            layer.closeAll();
+                            layer.msg(res.data.data, {icon: 1,offset: 't'})
+                            this.getUserList();
+                        }else{
+                            console.log(res.data)
+                            layer.msg(res.data.data, {icon: 5,offset: 't'})
+                        }
+                    })
+                }else{
+                    layer.msg('请输入完整的参数!', {icon: 5,offset: 't'})
+                }
+            },
+            openUpdateOrSave(openType,par){
+                let _this = this;
+                _this.modelType = openType;
+                if(par){
+                    this.param = {
+                        id:par.id,
+                        userName:par.userName,
+                        userPwd:par.userPwd,
+                        userLvl:par.userLvl
+                    };
+                }else{
+                    this.param = {
+                        userName:"",
+                        userPwd:"123456",
+                        userLvl:1
+                    };
+                }
+                layer.open({
+                    type:1,
+                    area:['300px','300px'],
+                    title: openType==1?'修改用户':'添加用户',
+                    content: $("#showModel"),
+                    shade: 0,
+                    btn: ['提交']
+                    ,btn1: function(index, layero){
+                        _this.saveUser();
+                    },
+                    cancel: function(layero,index){
+                        layer.closeAll();
+                    }
+                });
+            }
+        },
+        mounted() {
+            this.getUserList();
+
+        },
+        updated(){
+
+        },
+    })
+</script>

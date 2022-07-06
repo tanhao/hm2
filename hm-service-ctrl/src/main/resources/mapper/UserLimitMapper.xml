@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserLimitMapper">
+    <select id="getUserLotteryLimit" resultType="com.xzy.pojo.user.response.UserLotteryLimitRp">
+      SELECT TC.KIND_KEY,HUB.MARKET_OPEN,CASE HUB.MARKET_OPEN WHEN 'A' THEN regress_a WHEN 'B' THEN regress_b WHEN 'C' THEN regress_c WHEN 'D' THEN regress_d
+			 ELSE 0 END REGRESS,(SELECT CFG_VAL FROM HM_CTRL.T_SYSTEM_CONFIG WHERE CFG_KEY = 'min_bet_amt') MIN_BET_LIMIT,TULT.MAX_BET MAX_BET_LIMIT,TULT.MAX_PERIOD MAX_PERIOD_LIMIT
+        FROM (
+          SELECT #{userId} user_id,#{lotteryId} lottery_id,r.kind_id,
+					GREATEST(SUM(regress_a),0) regress_a,GREATEST(SUM(regress_b),0) regress_b,GREATEST(SUM(regress_c),0) regress_c,GREATEST(SUM(regress_d),0) regress_d
+					FROM hm_ctrl.t_user_regress r,( SELECT user_id,user_level FROM hm_manage.hm_user WHERE user_id=#{userId} OR FIND_IN_SET(user_id,(SELECT parent_path FROM hm_manage.hm_user WHERE user_id=#{userId})) ) u
+					WHERE r.user_id=u.user_id AND r.lottery_id=#{lotteryId} AND  u.user_level>2
+					GROUP BY r.lottery_id,r.KIND_ID
+        ) TULC
+        LEFT JOIN HM_CTRL.T_USER_LIMIT TULT ON TULC.USER_ID=TULT.USER_ID AND TULC.LOTTERY_ID=TULT.LOTTERY_ID AND TULC.KIND_ID= TULT.KIND_ID
+        LEFT JOIN HM_MANAGE.HM_USER_BASE HUB ON TULC.USER_ID =HUB.USER_ID
+        LEFT JOIN HM_CTRL.T_KIND TC ON TULC.KIND_ID = TC.KIND_ID
+    </select>
+</mapper>

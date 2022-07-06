@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mem.dao.RoadMapper">
+
+    <select id="getGroupKey" resultType="java.lang.String" parameterType="java.lang.Integer">
+          SELECT GR.GROUP_KEY from HM_CTRL.T_GROUP GR ,HM_CTRL.T_LOTTERY TL WHERE GR.GROUP_ID = TL.GROUP_ID AND TL.LOTTERY_ID = #{lotteryId}
+    </select>
+
+
+      <select id="getResultList" resultType="com.xzy.pojo.result.response.ResultRp">
+        SELECT * FROM HM_ORDER.HM_RESULT
+        WHERE LOTTERY_ID=#{lotteryId} AND ACCOUNT_DAY=#{accountDay}
+         and result is not null
+         ORDER BY ACTION_TIME DESC
+    </select>
+
+</mapper>

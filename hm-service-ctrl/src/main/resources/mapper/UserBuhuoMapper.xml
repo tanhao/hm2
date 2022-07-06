@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserBuhuoMapper">
+
+    <select id="listUserBuhuoDOs" resultType="com.xzy.pojo.ctrl.UserBuhuoDO">
+        select * from t_user_buhuo where user_id=#{userId}
+    </select>
+
+    <select id="listUserBuhuoStats" statementType="CALLABLE" resultType="com.xzy.pojo.ctrl.bo.UserBuhuoStatsBO">
+        SELECT s.lottery_id,c.kind_id,max(s.amt) amt
+        FROM (
+            SELECT l.lottery_id,s.odds_id,sum(s.sz_amt-s.bh_amt) amt FROM (
+                SELECT r.lottery_id,r.game_no,r.action_time,r.open_time
+                FROM hm_order.hm_result r
+                WHERE r.ACTION_TIME> UNIX_TIMESTAMP() AND  <![CDATA[ r.open_time <=UNIX_TIMESTAMP() ]]>
+                AND r.ACCOUNT_DAY = DATE(DATE_ADD(NOW(), INTERVAL -7 HOUR))
+            )l
+            INNER JOIN hm_order.hm_order_stats s ON s.user_id=#{userId} AND l.lottery_id=s.lottery_id AND s.game_no=l.game_no
+            GROUP BY l.lottery_id,s.odds_id
+        ) s
+        INNER JOIN t_odds o ON o.odds_id=s.odds_id
+        INNER JOIN t_category c ON c.category_id=o.category_id
+        GROUP BY s.lottery_id,c.kind_id
+    </select>
+
+    <select id="getManualBuhuoAmt"  resultType="Integer" parameterType="com.xzy.pojo.ctrl.request.ManualBuhuoRQ">
+        SELECT hm_order.FUN_GET_MANUAL_BH_AMT(#{userId},#{lotteryId},#{gameNo},#{oddsId})
+    </select>
+
+    <select id="manualBuhuo" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.ManualBuhuoRQ">
+        {
+            CALL hm_order.SP_HM_BET_BUHUO(
+                #{lotteryId,mode=IN,jdbcType=INTEGER},
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{gameNo,mode=IN,jdbcType=VARCHAR},
+                #{market,mode=IN,jdbcType=VARCHAR},
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{uniqueId,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER}
+            )
+        }
+    </select>
+
+    <update id="updateBuhuo" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.BuhuoRQ">
+        {
+            CALL SP_UPDATE_BUHUO(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </update>
+
+
+
+
+</mapper>

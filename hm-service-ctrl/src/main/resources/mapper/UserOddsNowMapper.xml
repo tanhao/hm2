@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserOddsNowMapper">
+
+    <select id="listUserOddsNowDOs"   resultType="com.xzy.pojo.ctrl.bo.UserOddsNowBO">
+        select u.user_level,o.odds_id,
+            case #{market} when 'A' then odds_a when 'B' then odds_b when 'C' then odds_c when 'D' then odds_d  end  as odds
+        from t_user_odds_now o,
+        (select * from hm_manage.hm_user where user_level>=2 and find_in_set(user_id,(select concat(parent_path,user_id,',') from hm_manage.hm_user where user_id=#{userId}))) u
+        where o.lottery_id=#{lotteryId} and o.user_id=u.user_id
+    </select>
+
+</mapper>

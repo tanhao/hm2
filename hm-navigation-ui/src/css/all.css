@@ -1,0 +1,317 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 微软雅黑;
+}
+
+a,
+a:visited {
+    text-decoration: none;
+}
+
+body {
+    text-align: center;
+}
+
+p {
+    color: #505050;
+}
+
+body,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+span,
+a,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+input,
+p,
+select,
+option,
+img {
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    list-style: none;
+}
+
+body {
+    background-color: #f0f5f5;
+    font-family: "微软雅黑";
+    font-size: 12px;
+    color: #d6cb9c;
+}
+
+a:link,
+a:visited {
+    color: #d6cb9c;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/*------------首页开始------------------*/
+
+.Testing {
+    overflow: hidden;
+    width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.Testing_main {
+    padding-top: 40px;
+}
+
+.Testing_main > p {
+    color: #0088fe;
+    font-size: 28px;
+}
+
+.Testing_main > .p30 {
+    margin-top: 30px;
+}
+
+.Testing_main > .p25 {
+    /* border-left: 7px solid #dd4949; */
+    font-size: 20px;
+    margin-top: 30px;
+    margin-bottom: 35px;
+}
+
+.Testing_main > .p20 {
+    margin-top: 20px;
+}
+
+.Testing_main > .p {
+    color: #666666;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.Testing_main .linelist {
+    display: flex;
+    margin-top: 25px;
+}
+
+.Testing_main .linelist ul {
+    float: left;
+    display: table;
+    padding: 0 0px;
+    width: 33%;
+}
+
+.Testing_main .txt,
+.Testing_main .hzhb {
+    margin: 0 auto;
+    display: table;
+}
+
+.Testing_main .txt li,
+.Testing_main .hzhb li {
+    width: 33%;
+    float: left;
+}
+
+.Testing_main .txt p,
+.Testing_main .hzhb p {
+    margin: 12px 0;
+    color: #0088fe;
+    font-size: 18px;
+}
+
+.Testing_main .hzhb li span {
+    font-size: 14px;
+    display: table;
+    margin: 10px 0;
+    text-align: center;
+    width: 100%;
+    float: left;
+}
+
+.Testing_main .hzhb li span a {
+    margin: 0 auto;
+    display: table;
+    border: solid 1px #007bfc;
+    padding: 8px;
+    width: 310px;
+    background-color: #fbfbfb;
+    color: #000000;
+    font-size: 12px;
+}
+
+.Testing_main .hzhb li span a:hover {
+    text-decoration:none;
+    background-color: #0088fe;
+    color: white;
+}
+
+.Testing_main .linelist li {
+    width: 100%;
+}
+
+.Testing_main .linelist li:last-child {
+    margin-right: 0px;
+}
+
+.linelist img {
+    height: 14px;
+    float: left;
+    margin-right: 0.2rem;
+}
+
+.Testing_main .linelist li > p {
+    border-radius: 100px;
+    border: solid 1px #007bfc;
+    padding: 8px;
+    width: 330px;
+    background-color: #fbfbfb;
+    color: #000000;
+    font-size: 12px;
+    margin: 25px auto;
+}
+
+.Testing_main .linelist li > p b {
+    display: table;
+    margin: 0px 5px;
+    float: left;
+}
+
+.Testing_main .linelist li > p > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 5px;
+}
+
+.Testing_main .linelist li > p > a {
+    border-radius: 100px;
+    color: white;
+    float: right;
+    background-image: -moz-linear-gradient(75deg, rgb(40, 234, 215) 1%, rgb(0, 136, 254) 99%);
+    background-image: -webkit-linear-gradient(75deg, rgb(40, 234, 215) 1%, rgb(0, 136, 254) 99%);
+    background-image: -ms-linear-gradient(75deg, rgb(40, 234, 215) 1%, rgb(0, 136, 254) 99%);
+    height: 33px;
+    margin-top: -9px;
+    width: 50px;
+    margin-right: -8px;
+    line-height: 34px;
+}
+
+.Testing_main .linelist li label {
+    display: inline-block;
+    position: relative;
+    width: 126px;
+    height: 118px;
+    line-height: 21px;
+}
+
+.Testing_main .linelist li label:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    display: inline-block;
+    background: url('../images/ms01.png') center;
+    width: 126px;
+    height: 118px;
+}
+
+.Testing_main .linelist li:nth-child(2) label:before {
+    background: url('../images/ms02.png') center;
+}
+
+.Testing_main .linelist li:nth-child(3) label:before {
+    background: url('../images/ms03.png') center;
+}
+
+.Testing_main .linelist li:nth-child(4) label:before {
+    background: url('../images/ms02.png') center;
+}
+
+.Testing_main .linelist li:nth-child(5) label:before {
+    background: url('../images/ms03.png') center;
+}
+
+.Testing_main .linelist .li label:before {
+    background: url('../images/ms04.png') center !important;
+}
+
+.Testing_main .linelist .li label span {
+    color: #ffad00 !important;
+}
+
+.Testing_main .linelist li label span {
+    color: #0088fe;
+    font-size: 26px;
+    height: 48px;
+    display: inline-block;
+    margin-top: 36px;
+    line-height: 26px;
+}
+
+.Testing_main > input {
+    display: inline-block;
+    border-radius: 100px;
+    width: 332px;
+    height: 40px;
+    background-color: #0088fe;
+    color: white;
+    margin-top: 35px;
+}
+
+.Testing_footer {
+    border-radius: 10px;
+    padding: 15px;
+    margin: 0 auto;
+    margin-top: 70px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.14);
+    height: 165px;
+    margin-bottom: 100px;
+}
+
+.Testing_footer div {
+    width: 32.5%;
+    height: 150px;
+    display: inline-block;
+    float: left;
+    margin-right: 10px;
+}
+
+.Testing_footer div:last-child {
+    margin-right: 0;
+}
+
+.Testing_footer div h6 {
+    color: #333333;
+    text-align: left;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.Testing_footer div p {
+    color: #666666;
+    text-align: left;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.Testing_footer div img {
+    left: -20px;
+    position: relative;
+    margin-top: 30px;
+}

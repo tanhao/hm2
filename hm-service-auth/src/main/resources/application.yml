@@ -1,0 +1,16 @@
+server:
+  port: 23100
+  servlet:
+    context-path: /auth
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: hm2-service-auth
+
+#日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: auth
+logging:
+  config: classpath:logback-spring.xml

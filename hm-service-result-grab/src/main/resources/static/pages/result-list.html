@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body>
+<div id="app">
+    <div class="x-body">
+        <div style="float: left;margin-right: 10px">
+            <blockquote class="layui-elem-quote">
+                <button class="layui-btn layui-btn-small" @click="getResultInitList(1)"> {{refreshTime1}} 一区刷新</button>
+                <button class="layui-btn layui-btn-small" @click="getResultInitList(2)"> {{refreshTime2}} 二区刷新</button>
+                <button class="layui-btn layui-btn-small" @click="getResultInitList(3)"> {{refreshTime3}} 三区刷新</button>
+            </blockquote>
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th style="width: 110px">游戏</th>
+                    <th style="width: 130px;">期号</th>
+                    <th style="width: 145px;">开奖时间</th>
+                    <th style="width: 340px">结果</th>
+                    <th style="width: 90px;">用时</th>
+                    <th style="width: 120px;">途径</th>
+                </tr>
+                </thead>
+                <tbody v-for="results,i in resultInitItems1">
+                <tr v-for="item,j in results.list">
+                    <td rowspan="3" v-if="j==0">
+                        <a href="#1" style="color: blue"
+                           @click="getResultNullList(1,item.lotteryKey,item.lotteryKey,1)">
+                            一区<br/>{{getLotteryName(item.lotteryKey)}}
+                        </a>
+                    </td>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTimeStr}}</td>
+                    <td>
+                        <div :class="getClassCss(item.lotteryKey)">
+                            <div style="float: left" v-for="(resultNum,index01) in item.result" :key="'x_'+index01"
+                                 :class="'n_'+resultNum.num*1">{{resultNum.num}}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{item.secondTime}} <span v-if="item.secondTime">s</span></td>
+                    <td>{{getLinkItem(item.link)}}</td>
+                </tr>
+                </tbody>
+                <tbody v-for="results,i in resultInitItems2">
+                <tr v-for="item,j in results.list">
+                    <td rowspan="3" v-if="j==0"><a href="#1" style="color: blue"
+                                                   @click="getResultNullList(1,item.lotteryKey,item.lotteryKey,2)">
+                        二区<br/>{{getLotteryName(item.lotteryKey)}}</a></td>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTimeStr}}</td>
+                    <td>
+                        <div :class="getClassCss(item.lotteryKey)">
+                            <div style="float: left" v-for="(resultNum,index01) in item.result" :key="'x_'+index01"
+                                 :class="'n_'+resultNum.num*1">{{resultNum.num}}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{item.secondTime}} <span v-if="item.secondTime">s</span></td>
+                    <td>{{getLinkItem(item.link)}}</td>
+                </tr>
+                </tbody>
+
+                <tbody v-for="results,i in resultInitItems3">
+                <tr v-for="item,j in results.list">
+                    <td rowspan="3" v-if="j==0"><a href="#1" style="color: blue"
+                                                   @click="getResultNullList(1,item.lotteryKey,item.lotteryKey,3)">
+                        三区<br/>{{getLotteryName(item.lotteryKey)}}</a></td>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTimeStr}}</td>
+                    <td>
+                        <div :class="getClassCss(item.lotteryKey)">
+                            <div style="float: left" v-for="(resultNum,index01) in item.result" :key="'x_'+index01"
+                                 :class="'n_'+resultNum.num*1">{{resultNum.num}}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{item.secondTime}} <span v-if="item.secondTime">s</span></td>
+                    <td>{{getLinkItem(item.link)}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="width: 500px; float: left;" v-if="lotteryName!=''">
+            <blockquote class="layui-elem-quote">
+                <button class="layui-btn layui-btn-small"
+                        @click="getResultNullList(params.page,params.lotteryKey,params.lotteryKey)"> 刷新
+                </button>
+            </blockquote>
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th colspan="5" style="text-align: center">{{getLotteryName(lotteryName)}}</th>
+                </tr>
+                <tr>
+                    <th width="100px">期号</th>
+                    <th width="140px">开奖时间</th>
+                    <th style="width: 285px">结果</th>
+                </tr>
+                </thead>
+                <tbody v-for="item in resultNullItems">
+                <tr>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTimeStr}}</td>
+                    <td>
+                        <div v-if="item.link">
+                            <div :class="getClassCss(item.lotteryKey)">
+                                <div style="float: left" v-for="(resultNum,index01) in item.result" :key="'x_'+index01"
+                                     :class="'n_'+resultNum.num*1">{{resultNum.num}}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div class="layui-input-inline" v-for="k in item.result">
+                                <input type="number" class="layui-input"
+                                       oninput="if(value.length>2)value=value.slice(0,2)"
+                                       style="width: 35px;margin-right: 5px" v-model="k.num"/>
+                            </div>
+                            <button type="button" class="layui-btn layui-btn-normal layui-btn-small"
+                                    @click="putResultNull(item)">确认
+                            </button>
+
+                        </div>
+                        <br/>
+                        <div v-if="!item.link" style="margin-top: -15px">结果请输入在<span style="color:#ff0000;"> [ {{lotteryCodeNums}} ]  </span>区间的数字
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div id="pageDiv" style="text-align: center"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            param: [Format(new Date(), "yyyy-MM-dd"), Format(new Date(), "yyyy-MM-dd")],
+            linkItems: [],
+            lotteryItems: [],
+            resultInitItems1: [],
+            resultInitItems2: [],
+            resultInitItems3: [],
+            resultNullItems: [],
+            lotteryCodeNums: "",
+            dateStr: '',
+            groupId: null,
+            lotteryName: '',
+            refreshTime1: 3,
+            refreshTime2: 10,
+            refreshTime3: 40,
+            refreshAllTime: 3,
+            timer: null,
+            timer1: null,
+            timer2: null,
+            timer3: null,
+            params: {
+                lotteryKey: "",
+                page: 1,
+                size: 18
+            },
+        },
+        methods: {
+            getLinkItem(key) {
+                let linkItem = this.linkItems.find(v => v.linkKey == key);
+                if (linkItem) {
+                    return linkItem.linkName;
+                }
+                return key;
+            },
+            getLotteryName(k) {
+                let name = this.lotteryItems.find(v => v.lotteryKey == k);
+                if (name) {
+                    return name.lotteryName;
+                }
+                return k;
+            },
+            getClassCss(k) {
+                if ('gdkl10,lucky8,speed8,xync,gxkl10'.indexOf(k) > -1) return 'klsf';
+                if ('cqssc,jsssc,lucky5,xjssc,hmcqssc,xcqssc,xgklc'.indexOf(k) > -1) return 'ssc';
+                if ('bjpk10,xyft,speed10,sbspeed10,lucky10,hmpk10,amft,yzjsft,xjpkt,twklt'.indexOf(k) > -1) return 'pk10';
+                if ('pcdd,jnd28,jsdd'.indexOf(k) > -1) return 'luck28';
+                if ('lucky20,jskl8'.indexOf(k) > -1) return 'kl8';
+                if ('epssm'.indexOf(k) > -1) return 'SMN';
+            },
+            getResultCounts(key) {
+                let countsItem = this.resultNullCounts.find(v => v.lotteryKey == key);
+                if (countsItem) {
+                    return countsItem.counts;
+                }
+                return 0;
+            },
+            getResultInitList(groupId) {
+                axios.get("/link/result/group/" + groupId).then(res => {
+                    if (res.data.success) {
+                        let items = res.data.data.newList;
+                        items.forEach(items => {
+                            if (items.result) {
+                                let nums = items.result.split(",");
+                                let map = [];
+                                for (let i = 0; i < nums.length; i++) {
+                                    map.push({num: nums[i]})
+                                }
+                                items.result = map;
+                            }
+                        });
+                        items = groupingData(items, "lotteryKey");
+                        if (groupId == 1) {
+                            this.resultInitItems1 = [];
+                            this.resultInitItems1 = items;
+                        }
+                        if (groupId == 2) {
+                            this.resultInitItems2 = [];
+                            this.resultInitItems2 = items;
+                        }
+                        if (groupId == 3) {
+                            this.resultInitItems3 = [];
+                            this.resultInitItems3 = items;
+                        }
+                    }
+                })
+            },
+            refreshList() {
+                clearInterval(this.timer1);
+                clearInterval(this.timer2);
+                clearInterval(this.timer3);
+                this.timer1 = setInterval(() => {
+                    this.refreshTime1 -= 1;
+                    if (this.refreshTime1 == 0) {
+                        this.getResultInitList(1);
+                        this.refreshTime1 = 3;
+                    }
+                }, 1200);
+                this.timer2 = setInterval(() => {
+                    this.refreshTime2 -= 1;
+                    if (this.refreshTime2 == 0) {
+                        this.getResultInitList(2);
+                        this.refreshTime2 = 10;
+                    }
+                }, 1200);
+                this.timer3 = setInterval(() => {
+                    this.refreshTime3 -= 1;
+                    if (this.refreshTime3 == 0) {
+                        this.getResultInitList(3);
+                        this.refreshTime3 = 40;
+                    }
+                }, 1200);
+            },
+            refreshAllList(groupId) {
+                let time = 3;
+                if (groupId == 1) {
+                    time = 3;
+                    this.refreshAllTime = 3;
+                }
+                if (groupId == 2) {
+                    time = 10;
+                    this.refreshAllTime = 10;
+                }
+                if (groupId == 3) {
+                    time = 40;
+                    this.refreshAllTime = 40;
+                }
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    this.refreshAllTime -= 1;
+                    if (this.refreshAllTime == 0) {
+                        this.getResultNullList(this.params.page, this.params.lotteryKey, this.params.lotteryKey)
+                        this.refreshAllTime = time;
+                    }
+                }, 1200);
+            },
+            getResultNullList(page, lotteryName, lotteryKey, groupId) {
+                let _this = this;
+                _this.params.page = page;
+                _this.lotteryName = lotteryName;
+                /* if(groupId){
+                     _this.groupId = groupId;
+                     console.log(_this.groupId)
+                     _this.refreshAllList(groupId);
+                 }*/
+                _this.params.lotteryKey = lotteryKey;
+                _this.resultNullItems = [];
+                _this.lotteryCodeNums = "";
+                axios.put("/link/day", _this.params).then(res => {
+                    if (res.data.success) {
+                        _this.resultNullItems = res.data.data.dataList;
+                        if (_this.resultNullItems.length > 0) {
+                            _this.resultNullItems.forEach(items => {
+                                let nums = this.lotteryItems.find(v => v.lotteryKey == items.lotteryKey);
+                                _this.lotteryCodeNums = nums.codeNums;
+                                if (!items.result) {
+                                    let map = [];
+                                    for (let i = 0; i < nums.resultSize; i++) {
+                                        map.push({num: ""})
+                                    }
+                                    items.result = map;
+                                } else {
+                                    let nums = items.result.split(",");
+                                    let map = [];
+                                    for (let i = 0; i < nums.length; i++) {
+                                        map.push({num: nums[i]})
+                                    }
+                                    items.result = map;
+                                }
+                            })
+                        }
+                        if (page == 1) {
+                            _this.pageUiInfo(res.data.data.total);
+                        }
+                    }
+                })
+            },
+            pageUiInfo(count) {
+                let _this = this;
+                layui.use(['laypage', 'layer'], function () {
+                    let laypage = layui.laypage
+                        , layer = layui.layer;
+                    //不显示首页尾页
+                    laypage.render({
+                        elem: 'pageDiv', count: count, limit: _this.params.size,
+                        jump: function (obj, first) {
+                            if (!first) {
+                                _this.params.page = obj.curr;
+                                _this.getResultNullList(obj.curr, _this.lotteryName, _this.params.lotteryKey);
+                            }
+                        }
+                    });
+                });
+            },
+            putResultNull(item) {
+                let codeNums = this.lotteryCodeNums.split(",");
+                let errMsg = "";
+                let result = [];
+                item.result.forEach(ite => {
+                    let err = codeNums.find(v => v == ite.num);
+                    if (!err) {
+                        errMsg += "" + ite.num + "，"
+                    }
+                    result.push(ite.num)
+                })
+                if (errMsg == "") {
+                    item.result = result.join(",");
+                    this.resultNullItems.splice(this.resultNullItems.findIndex(i => i.id === item.id), 1)
+                    axios.put("/link/result", item).then(res => {
+                        if (res.data.success) {
+                            layer.msg(res.data.data, {icon: 1, offset: 't'})
+                        } else {
+                            layer.msg('修改失败，请重新提交!', {icon: 5, offset: 't'})
+                        }
+                    })
+                } else {
+                    layer.msg('错误输入【 ' + errMsg + ' 】请输入正确的结果!', {icon: 5, offset: 't'})
+                }
+            },
+        },
+        mounted() {
+            this.refreshList();
+            this.getResultInitList(1);
+            this.getResultInitList(2);
+            this.getResultInitList(3);
+            axios.get('/link/list')
+                .then(res => {
+                    if (res.data.success) {
+                        this.linkItems = res.data.data;
+                    }
+                });
+            axios.get('/link/lotlist')
+                .then(res => {
+                    if (res.data.success) {
+                        this.lotteryItems = res.data.data;
+                    }
+                })
+        },
+        destroyed() {
+            clearInterval(this.timer);
+            clearInterval(this.timer1);
+            clearInterval(this.timer2);
+            clearInterval(this.timer3);
+        }
+    })
+</script>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.PlayMapper">
+    <select id="listPlays" resultType="com.xzy.pojo.ctrl.PlayDO">
+        select * from t_play  order by play_id,ordering
+    </select>
+</mapper>

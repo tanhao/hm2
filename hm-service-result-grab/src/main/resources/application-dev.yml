@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://114.112.240.53:3306/hm_result?allowMultiQueries=true
+    username: result
+    password: aa123456
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20
+      connection-timeout: 5000
+      idle-timeout: 60000
+      max-lifetime: 60000
+  redis:
+    database: 12
+    host: 114.112.240.53
+    port: 6379
+    password: hm123456
+    timeout: 10000 #连接超时 毫秒
+    jedis:
+      pool:
+        max-active: 100
+        max-idle: 10
+        max-wait: 10000 #连接池最大等行时间 -1没有限制
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true  #驼峰命名
+    default-fetch-size: 5000
+
+rocketmq:
+  start: false
+

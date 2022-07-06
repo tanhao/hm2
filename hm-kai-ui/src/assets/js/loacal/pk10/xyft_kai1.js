@@ -1,0 +1,6 @@
+getPksHistoryList
+{"errorCode":0,"message":"操作成功","result":
+{"businessCode":0,"data":[{"preDrawCode":"03,10,05,08,06,02,07,09,01,04","groupCode":1,"preDrawIssue":51218840,"preDrawTime":"2018-03-17 15:34:45","sumSingleDouble":0,"fifthDT":0,"firstDT":1,"fourthDT":0,"secondDT":0,"sumBigSamll":0,"sumFS":13,"thirdDT":1}],"message":"操作成功"}}
+
+getLotteryPksInfo
+{"errorCode":0,"message":"操作成功","result":{"businessCode":0,"data":{"preDrawCode":"03,10,05,08,06,02,07,09,01,04","drawIssue":51218841,"drawTime":"2018-03-17 15:36:00","firstNum":3,"preDrawIssue":51218840,"secondNum":10,"thirdNum":5,"fourthNum":8,"fifthNum":6,"sixthNum":2,"preDrawTime":"2018-03-17 15:34:45","preDrawDate":"2018-03-17","drawCount":748,"sumSingleDouble":0,"firstDT":1,"fourthDT":0,"secondDT":0,"sumBigSamll":0,"sumFS":13,"thirdDT":1,"eighthNum":9,"ninthNum":1,"seventhNum":7,"tenthNum":4,"fifthDT":0,"serverTime":"2018-03-17 15:35:18","frequency":"","lotCode":10035,"iconUrl":"","shelves":0,"groupCode":35,"lotName":"极速飞艇","totalCount":1152,"index":100},"message":"操作成功"}}

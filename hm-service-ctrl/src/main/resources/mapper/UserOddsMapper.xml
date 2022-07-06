@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserOddsMapper">
+
+    <!-- 取后桶的赔率 -->
+    <select id="listHoutongOdds"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        SELECT o.lottery_id,o.category_id,
+            c.odds base_odds,
+            f.odds odds,
+            FLOOR(((100-r.regress_a)*f.odds/100)*c.decimals)/c.decimals base_odds_a,
+            FLOOR(((100-r.regress_b)*f.odds/100)*c.decimals)/c.decimals base_odds_b,
+            FLOOR(((100-r.regress_c)*f.odds/100)*c.decimals)/c.decimals base_odds_c,
+            FLOOR(((100-r.regress_d)*f.odds/100)*c.decimals)/c.decimals base_odds_d,
+            o.odds_a,o.odds_b,o.odds_c,o.odds_d
+        FROM t_category c,(select * from t_user_odds where user_id=#{userId}) o,
+            (select * from t_user_fullodds where user_id=#{userId}) f,
+            (select * from t_user_regress where user_id=#{userId}) r
+        WHERE f.lottery_id=o.lottery_id AND f.category_id=o.category_id
+        AND r.lottery_id=o.lottery_id AND r.kind_id=c.kind_id
+        AND c.category_id=o.category_id
+        ORDER BY o.lottery_id,r.kind_id,o.category_id
+    </select>
+    <!-- 取公司的赔率 -->
+    <select id="listCompanyOdds"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        SELECT o.lottery_id,o.category_id,
+            c.odds base_odds,
+            f.odds odds,
+            FLOOR(((100-r.regress_a)*f.odds/100)*c.decimals)/c.decimals base_odds_a,
+            FLOOR(((100-r.regress_b)*f.odds/100)*c.decimals)/c.decimals base_odds_b,
+            FLOOR(((100-r.regress_c)*f.odds/100)*c.decimals)/c.decimals base_odds_c,
+            FLOOR(((100-r.regress_d)*f.odds/100)*c.decimals)/c.decimals base_odds_d,
+            o.odds_a,o.odds_b,o.odds_c,o.odds_d
+        FROM t_category c,(select * from t_user_odds where user_id=#{userId}) o,
+            (select * from t_user_fullodds where user_id=#{userId}) f,
+            (select * from t_user_regress where user_id=#{userId}) r
+        WHERE f.lottery_id=o.lottery_id AND f.category_id=o.category_id
+            AND r.lottery_id=o.lottery_id AND r.kind_id=c.kind_id
+            AND c.category_id=o.category_id
+        ORDER BY o.lottery_id,r.kind_id,o.category_id
+    </select>
+    <!-- 取一级非标准用户的赔率 -->
+    <select id="listAgent1OddsUnstandard"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        SELECT o.lottery_id,o.category_id,
+            f.odds base_odds,
+            f.odds odds,
+            FLOOR(((100-r.regress_a)*f.odds/100)*c.decimals)/c.decimals base_odds_a,
+            FLOOR(((100-r.regress_b)*f.odds/100)*c.decimals)/c.decimals base_odds_b,
+            FLOOR(((100-r.regress_c)*f.odds/100)*c.decimals)/c.decimals base_odds_c,
+            FLOOR(((100-r.regress_d)*f.odds/100)*c.decimals)/c.decimals base_odds_d,
+            o.odds_a,o.odds_b,o.odds_c,o.odds_d
+        FROM t_category c,(select * from t_user_odds where user_id=#{userId}) o,
+            (select * from hm_manage.hm_user where user_id=#{userId}) u,
+            t_user_fullodds f,
+            (select * from t_user_regress where user_id=#{userId}) r
+        WHERE f.lottery_id=o.lottery_id AND f.category_id=o.category_id
+            AND r.lottery_id=o.lottery_id AND r.kind_id=c.kind_id
+            AND c.category_id=o.category_id
+            AND f.user_id=u.parent_id
+        ORDER BY o.lottery_id,r.kind_id,o.category_id
+    </select>
+    <!-- 取一级标准用户的赔率 -->
+    <select id="listAgent1OddsStandard"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        SELECT o.lottery_id,o.category_id,
+            0 base_odds,
+            0 odds,
+            uo.odds_a base_odds_a,
+            uo.odds_b base_odds_b,
+            uo.odds_c base_odds_c,
+            uo.odds_d base_odds_d,
+            o.odds_a,o.odds_b,o.odds_c,o.odds_d
+        FROM (select * from t_user_odds where user_id=#{userId}) o,
+            (select * from hm_manage.hm_user where user_id=#{userId}) u,
+            t_user_odds uo
+        WHERE  uo.user_id=u.parent_id and uo.lottery_id=o.lottery_id and uo.category_id=o.category_id
+        ORDER BY o.lottery_id,o.category_id
+    </select>
+    <!-- 二级，三级...十级取自己的赔率 -->
+    <select id="listAgent2ToAgent10Odds"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        select o.lottery_id,o.category_id, sum(odds_a) odds_a,sum(odds_b) odds_b,sum(odds_c) odds_c,sum(odds_d) odds_d
+        from t_user_odds o,
+            (
+                select user_id from hm_manage.hm_user
+                where user_level>2
+                and  FIND_IN_SET(user_id,(select CONCAT(parent_path,#{userId},',') from hm_manage.hm_user where user_id=#{userId} ))
+            )u
+        where o.user_id=u.user_id
+        group by o.lottery_id,o.category_id
+    </select>
+    <!--赔差-->
+    <select id="listZhuanOdds"  parameterType="Integer"  resultType="com.xzy.pojo.ctrl.bo.UserZhuanOddsBO">
+        select x.*,ifnull(abs(o.odds_a),0) diff,m.maxdiff from (
+            select o.lottery_id,o.category_id, sum(odds_a) odds_a,sum(odds_b) odds_b,sum(odds_c) odds_c,sum(odds_d) odds_d
+            from t_user_odds o,(select user_id from hm_manage.hm_user where user_level>2 and  FIND_IN_SET(user_id,(select parent_path from hm_manage.hm_user where user_id=#{userId} )))u
+            where o.user_id=u.user_id
+            group by o.lottery_id,o.category_id
+        )x
+        inner join hm_manage.hm_user u on u.user_id=#{userId}
+        left join t_user_odds o on o.user_id=#{userId} and o.lottery_id=x.lottery_id and o.category_id=x.category_id
+        left join t_user_maxdiff m on m.user_id=u.company_id and m.lottery_id=x.lottery_id and m.category_id=x.category_id
+
+    </select>
+    <!--后桶改自己-->
+    <select id="updateORCLHoutong" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_ORLF_HOUTONG(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <!--公司改自己-->
+    <select id="updateORCLCompany" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_ORLF_COMPANY(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <!--后桶改公司-->
+    <select id="updateCompanyORLF" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_COMPANY_ORLF(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <!--公司改一级-->
+    <select id="updateAgent1ORL" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_AGENT1_ORL(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <select id="updateAgent1RegressLimit" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_AGENT1_REGRESS_LIMIT(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <select id="copyCompany" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.CopyORLFRQ">
+        {
+            CALL SP_COPY_COMPANY(
+                #{fromUserId,mode=IN,jdbcType=INTEGER},
+                #{toUserId,mode=IN,jdbcType=INTEGER},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <select id="copyAgent1" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.CopyORLFRQ">
+        {
+            CALL SP_COPY_AGENT1(
+                #{fromUserId,mode=IN,jdbcType=INTEGER},
+                #{toUserId,mode=IN,jdbcType=INTEGER},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <!--赚赔-->
+    <select id="updateZhuanOdds" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_ZHUAN_ODDS(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+
+    <!--取用户赔率-->
+    <select id="listNowAgent1ToAgent10Odds" resultType="com.xzy.pojo.ctrl.bo.UserOddsBO" >
+        select u.user_level,o.category_id,
+            case #{market} when 'A' then odds_a when 'B' then odds_b when 'C' then odds_c when 'D' then odds_d  end  as odds
+        from t_user_odds o,
+        (select * from hm_manage.hm_user where user_level>2 and find_in_set(user_id,(select concat(parent_path,user_id,',') from hm_manage.hm_user where user_id=#{userId}))) u
+        where o.lottery_id=#{lotteryId} and o.user_id=u.user_id
+    </select>
+    <select id="listNowHouTongOrCompanyOdds" resultType="com.xzy.pojo.ctrl.bo.UserOddsBO">
+        select u.user_level,o.category_id,
+            case #{market} when 'A' then odds_a when 'B' then odds_b when 'C' then odds_c when 'D' then odds_d  end  as odds
+        from t_user_odds o,hm_manage.hm_user u where o.lottery_id=#{lotteryId} and o.user_id=#{userId} and u.user_id=o.user_id
+    </select>
+
+
+
+    <select id="updateUserOdds" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsPlusMinusRQ">
+        {
+            CALL SP_UPDATE_ODDS(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <insert id="updateUserOddsStatus" parameterType="com.xzy.pojo.ctrl.request.OddsCloseRQ">
+        INSERT INTO t_user_odds_close(user_id,lottery_id,odds_id,is_close)
+        SELECT user_id,lottery_id,odds_id,is_close FROM (
+            SELECT #{userId} user_id,p.lottery_id,o.odds_id,#{isClose} is_close FROM
+            (SELECT * FROM t_odds WHERE odds_id= #{oddsId}) o
+            LEFT JOIN t_play p ON p.play_id=o.play_id
+        )n
+        ON DUPLICATE KEY UPDATE is_close=n.is_close
+    </insert>
+</mapper>

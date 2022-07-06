@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.ResultInitMapper">
+
+    <select id="selectPeriodByKey" resultType="com.xzy.result.vo.ResultInit">
+        SELECT * FROM t_result_init WHERE lottery_key= #{lotteryKey} AND game_no IN
+        <foreach collection="list" item="no" index="index" open="(" close=")" separator=",">
+            #{no}
+        </foreach>
+    </select>
+
+    <select id="selectByNewResultInit" resultType="com.xzy.result.vo.ResultInitVo">
+        SELECT tl.lottery_id,tr.game_no,tr.action_time-tl.invl_second open_time,tr.action_time,UNIX_TIMESTAMP() create_time,'WAITING' `status`,
+        DATE_FORMAT(DATE_ADD(FROM_UNIXTIME(action_time), INTERVAL -7 HOUR),'%Y-%m-%d') account_day,DATE_FORMAT(FROM_UNIXTIME(tr.action_time),'%Y-%m-%d') result_day,tr.lottery_key
+        FROM t_result_init tr,t_lottery tl
+        WHERE tr.action_time BETWEEN UNIX_TIMESTAMP(DATE(DATE_ADD(NOW(),INTERVAL 1 DAY)))+1 AND UNIX_TIMESTAMP(DATE(DATE_ADD(NOW(),INTERVAL 1+1 DAY)))
+        AND tr.lottery_key = tl.lottery_key
+        AND tl.lottery_key NOT IN ('yzjsft','xjpkt','amft','twklt','xcqssc','xgklc')
+        ORDER BY tl.lottery_id,tr.game_no;
+    </select>
+
+
+
+    <select id="findByGroupId" resultType="com.xzy.result.vo.ResultInit">
+        SELECT T.*,FROM_UNIXTIME(T.action_time) ACTION_TIME_STR FROM(
+        SELECT ROW_NUMBER() OVER (PARTITION BY U.LOTTERY_KEY ORDER BY IF(`RESULT`='NULL',0,1),GAME_NO DESC) AS RN,U.*
+        FROM T_RESULT_INIT U,T_LOTTERY L  WHERE U.LOTTERY_KEY = L.LOTTERY_KEY
+        <if test="groupId==1">
+            AND L.INVL_SECOND &lt;= 100
+        </if>
+        <if test="groupId==2">
+            AND L.INVL_SECOND = 300
+        </if>
+        <if test="groupId==3">
+            AND L.INVL_SECOND = 1200
+        </if>
+        AND ACTION_TIME &lt;=UNIX_TIMESTAMP()  AND RESULT_DAY BETWEEN DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 DAY),'%Y-%m-%d') AND DATE_FORMAT(NOW(),'%Y-%m-%d')
+        ORDER BY L.INVL_SECOND ASC,LOTTERY_ID ASC
+        ) T WHERE T.RN &lt;=3
+    </select>
+
+    <select id="selectResultInitByList" resultType="com.xzy.result.vo.ResultInit">
+        SELECT TRI.ID,TRI.LOTTERY_KEY,TL.LOTTERY_NAME,TRI.GAME_NO,TRI.ACTION_TIME,TRI.RESULT,TRI.SECOND_TIME,TRI.LINK,TRI.CREATE_IP,FROM_UNIXTIME(TRI.ACTION_TIME) ACTION_TIME_STR
+        FROM T_RESULT_INIT TRI ,
+        ( SELECT * FROM T_LOTTERY WHERE BY_OPEN = 1 ) TL
+        WHERE
+        TRI.LOTTERY_KEY = TL.LOTTERY_KEY
+        AND TRI.ACTION_TIME &lt; UNIX_TIMESTAMP()
+        AND TRI.RESULT_DAY = #{dateStr}
+        AND TRI.LOTTERY_KEY = #{lotteryKey}
+        ORDER BY TRI.ACTION_TIME DESC
+    </select>
+
+    <select id="findByNullResult" resultType="com.xzy.result.vo.ResultInit">
+        SELECT ID,GAME_NO,LOTTERY_KEY,RESULT FROM T_RESULT_INIT
+        WHERE RESULT IS NULL AND LOTTERY_KEY = #{lotteryKey}
+        AND ACTION_TIME &lt; UNIX_TIMESTAMP()-20
+        <if test="byDate==1">
+            AND accoun_day = #{dateStr}
+        </if>
+        <if test="byDate==0">
+            AND result_day = #{dateStr}
+        </if>
+
+    </select>
+
+    <select id="findByNullResultCounts" resultType="com.xzy.result.vo.ResultVo">
+        SELECT TT.LOTTERY_KEY,COUNT(TT.ID) COUNTS FROM T_RESULT_INIT TT,T_LOTTERY TR WHERE TT.LOTTERY_KEY = TR.LOTTERY_KEY
+        AND TR.BY_OPEN = 1
+        AND RESULT_DAY BETWEEN #{startDate} AND #{endDate}
+        AND RESULT IS NULL  AND ACTION_TIME &lt; UNIX_TIMESTAMP()
+        GROUP BY TT.LOTTERY_KEY
+    </select>
+
+    <select id="findByNullResultByLotteryKey" resultType="com.xzy.result.vo.ResultInit">
+        SELECT TT.*,FROM_UNIXTIME(TT.ACTION_TIME) ACTION_TIME_STR FROM T_RESULT_INIT TT
+        WHERE LOTTERY_KEY = #{lotteryKey}
+        AND RESULT_DAY BETWEEN #{startDate} AND #{endDate}
+        AND RESULT IS NULL AND ACTION_TIME &lt; UNIX_TIMESTAMP()
+        ORDER BY GAME_NO DESC
+    </select>
+
+    <update id="batchUpdateResultInit" parameterType="java.util.List">
+        <foreach collection="items" item="item" index="index" separator=";">
+            UPDATE T_RESULT_INIT
+            <set>
+                <if test="item.result != null">
+                    RESULT = #{item.result},
+                    LINK = #{item.link}
+                </if>
+            </set>
+            WHERE LOTTERY_KEY = #{item.lotteryKey} AND GAME_NO = #{item.gameNo}
+            and RESULT is null
+        </foreach>
+    </update>
+
+    <select id="selectByDayResult" resultType="com.xzy.result.vo.ResultInit">
+        SELECT TT.*,FROM_UNIXTIME(TT.ACTION_TIME) as ACTION_TIME_STR,IF(TT.RESULT IS NULL,1,0) COUNT_NULL
+        FROM T_RESULT_INIT TT
+        WHERE result_day = #{day} and lottery_key = #{lotteryKey}
+        AND ACTION_TIME &lt;= UNIX_TIMESTAMP()
+        ORDER BY COUNT_NULL DESC,GAME_NO DESC
+    </select>
+
+    <select id="selectBySumHisList" resultType="com.xzy.result.vo.ResultInit">
+        SELECT TT.*,FROM_UNIXTIME(TT.ACTION_TIME) AS ACTION_TIME_STR,IF(TT.RESULT IS NULL,1,0) COUNT_NULL
+        FROM T_RESULT_INIT TT
+        WHERE lottery_key = #{lotteryKey}
+        AND ACTION_TIME &lt;= UNIX_TIMESTAMP()
+        AND RESULT IS NOT NULL
+        ORDER BY COUNT_NULL DESC,GAME_NO DESC LIMIT #{num}
+    </select>
+
+
+    <select id="selectByNewDayResult" resultType="com.xzy.result.vo.LotteryApiVo">
+        SELECT * FROM (
+            SELECT TL.LOTTERY_KEY,
+            IF(RST.GAME_COUNT IS NULL,0,RST.GAME_COUNT) GAME_COUNT,
+            IF(RST.GAME_COUNT IS NULL,TL.TOTAL_ROUND,TL.TOTAL_ROUND-RST.GAME_COUNT) NEXT_ROUND,
+            TL.TOTAL_ROUND,TL.GROUP_ID,TL.INVL_SECOND,TL.START_TIME,
+            RST.GAME_NO,RST.ACTION_TIME,RST.RESULT,RST.NEXT_GAME_NO,RST.NEXT_ACTION_TIME
+            FROM (
+                SELECT * FROM (
+		SELECT * FROM
+		(
+		    SELECT LOTTERY_KEY,GAME_NO,FROM_UNIXTIME(ACTION_TIME) ACTION_TIME,RESULT FROM (SELECT * FROM T_RESULT_INIT
+		    WHERE  ACCOUN_DAY >= DATE(DATE_ADD(NOW(),INTERVAL -1 DAY)) AND RESULT IS NOT NULL ORDER BY ACTION_TIME DESC LIMIT 10000) A GROUP BY LOTTERY_KEY
+		) T1,
+		(
+		    SELECT LOTTERY_KEY LOKEY,GAME_NO NEXT_GAME_NO,FROM_UNIXTIME(ACTION_TIME) NEXT_ACTION_TIME
+		    FROM (SELECT * FROM T_RESULT_INIT WHERE ACTION_TIME > UNIX_TIMESTAMP() AND RESULT IS NULL ORDER BY ACTION_TIME ASC LIMIT 10000) A GROUP BY LOTTERY_KEY
+		)T2
+		WHERE T1.LOTTERY_KEY = T2.LOKEY
+		) T3 LEFT JOIN
+		(
+		    SELECT COUNT(GAME_NO) GAME_COUNT,LOTTERY_KEY LOKEY1 FROM (
+		    SELECT * FROM T_RESULT_INIT WHERE ACCOUN_DAY = DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 0 DAY),'%Y-%m-%d') AND LOTTERY_KEY IN ('bjpk10','xyft','gdkl10','xjssc') AND RESULT IS NOT NULL
+		    UNION ALL
+		    SELECT *  FROM T_RESULT_INIT WHERE RESULT_DAY = DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 0 DAY),'%Y-%m-%d') AND LOTTERY_KEY NOT IN ('bjpk10','xyft','gdkl10','xjssc')  AND RESULT IS NOT NULL
+		    ) A GROUP BY LOTTERY_KEY
+		) T4 ON T3.LOTTERY_KEY = T4.LOKEY1
+            ) AS RST RIGHT JOIN T_LOTTERY TL ON RST.LOTTERY_KEY = TL.LOTTERY_KEY
+        ) T4 WHERE LOTTERY_KEY NOT IN ('bjpk10','cqssc','gdkl10','xync','xjssc')
+    </select>
+
+    <select id="selectByHisList" resultType="com.xzy.result.vo.ResultInit">
+        SELECT TT.*,FROM_UNIXTIME(TT.ACTION_TIME) as ACTION_TIME_STR
+        FROM T_RESULT_INIT TT
+        WHERE lottery_key = #{lotteryKey}
+        <choose>
+            <when  test="lotteryKey=='xjssc' or lotteryKey=='gdkl10' or lotteryKey=='xyft' or lotteryKey=='bjpk10'">
+                and accoun_day = #{day}
+            </when>
+            <otherwise>
+                and result_day = #{day}
+            </otherwise>
+        </choose>
+        AND RESULT IS NOT NULL
+        ORDER BY GAME_NO DESC
+    </select>
+
+
+</mapper>

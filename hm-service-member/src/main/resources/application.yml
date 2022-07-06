@@ -1,0 +1,16 @@
+server:
+  port: 25000
+  servlet:
+    context-path: /mem
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: hm2-service-member
+
+  #日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: member
+logging:
+  config: classpath:logback-spring.xml

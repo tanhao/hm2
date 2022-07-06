@@ -1,0 +1,26 @@
+server:
+  port: 23701
+  servlet:
+    context-path: /logs
+
+spring:
+  profiles:
+    active: test
+  jackson:
+    default-property-inclusion: NON_NULL
+  application:
+    name: hm2-service-logs
+
+#日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: logs
+logging:
+  config: classpath:logback-spring.xml
+
+
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true  #驼峰命名
+    default-fetch-size: 5000

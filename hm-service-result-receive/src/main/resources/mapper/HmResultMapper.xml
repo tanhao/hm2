@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.HmResultMapper">
+
+    <select id="findTotalResult" resultType="com.xzy.pojo.result.HmResult" parameterType="String">
+        SELECT * FROM(
+        SELECT ROW_NUMBER() OVER (PARTITION BY lottery_key ORDER BY IF(`status`='WAITING',0,1),game_no DESC) AS rn,u.*
+        FROM hm_result u  WHERE  action_time &lt;=UNIX_TIMESTAMP()  AND account_day = #{accountDay}
+        ) t WHERE t.rn &lt;=3
+    </select>
+
+    <select id="saveResult" statementType="CALLABLE" parameterType="Object">
+        {
+          call SP_UPDATE_RESULT(
+                #{lotteryKey,mode=IN,jdbcType=VARCHAR},
+                #{gameNo,mode=IN,jdbcType=VARCHAR},
+                #{result,mode=IN,jdbcType=VARCHAR},
+                #{updateBy,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{stats,mode=OUT,jdbcType=VARCHAR},
+                #{cljp,mode=OUT,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="selectCountByResultDay" resultType="com.xzy.pojo.result.vo.ResultCountVo">
+         SELECT COUNT(1) count_total,SUM(IF(r.result IS NULL,1,0)) count_null,
+        SUM(IF(r.status='WAITING',1,0)) count_waiting,
+        r.lottery_id,r.lottery_key
+        FROM hm_result r ,hm_ctrl.t_lottery t
+        WHERE r.action_time &lt;=UNIX_TIMESTAMP()-60  AND r.result_day = #{day}
+        AND r.lottery_id=t.lottery_id AND is_zkc=0
+        GROUP BY r.lottery_id,r.lottery_key
+    </select>
+
+    <select id="selectCountByAccountDay" resultType="com.xzy.pojo.result.vo.ResultCountVo">
+        SELECT COUNT(1) count_total,SUM(IF(r.result IS NULL,1,0)) count_null,
+        SUM(IF(r.status='WAITING',1,0)) count_waiting,
+        r.lottery_id,r.lottery_key
+        FROM hm_result r ,hm_ctrl.t_lottery t
+        WHERE r.action_time &lt;=UNIX_TIMESTAMP()  AND r.account_day = #{day}
+        AND r.lottery_id=t.lottery_id
+        GROUP BY r.lottery_id,r.lottery_key
+    </select>
+
+    <select id="selectNoResultByLottery" resultType="com.xzy.pojo.result.HmResult">
+        SELECT * FROM hm_result WHERE lottery_id = #{lotteryId} AND result_day =  #{day} AND action_time &lt;=UNIX_TIMESTAMP()
+        AND result IS NULL
+        ORDER BY game_no desc
+    </select>
+
+    <select id="selectNoAccountByLottery" resultType="com.xzy.pojo.result.HmResult">
+        SELECT * FROM hm_result WHERE lottery_id = #{lotteryId} AND account_day =  #{day} AND action_time &lt;=UNIX_TIMESTAMP()
+        ORDER BY IF(result IS NULL ,0,1),game_no DESC
+    </select>
+
+    <select id="spPayoutPrize" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_PAYOUT_PRIZE_MANUAL(
+                #{lotteryKey,mode=IN,jdbcType=VARCHAR},
+                #{gameNo,mode=IN,jdbcType=INTEGER},
+                #{result,mode=IN,jdbcType=VARCHAR},
+                #{userName,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{lotteryInfo,mode=OUT,jdbcType=VARCHAR})
+        }
+    </select>
+
+    <select id="spBackOrder" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_BACK_ORDER(
+                #{lotteryInfo,mode=IN,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="spPayoutPrizeRepeat" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_PAYOUT_PRIZE_REPEAT(
+                #{resultId,mode=IN,jdbcType=INTEGER},
+                #{result,mode=IN,jdbcType=VARCHAR},
+                #{userName,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+    <update id="cancelOrder" >
+        update hm_order set status='CANCEL' where lottery_id = #{lotteryId} and game_no = #{gameNo}  and status='WAITING'
+    </update>
+
+    <insert id="addResult" parameterType="java.util.List">
+        INSERT INTO hm_result(lottery_id,game_no,open_time,action_time,create_time,`status`,account_day,result_day,lottery_key)
+        VALUES
+        <foreach collection="result" item="r" separator=",">
+            (#{r.lotteryId},#{r.gameNo},#{r.openTime},#{r.actionTime},#{r.createTime},#{r.status},#{r.accountDay},#{r.resultDay},#{r.lotteryKey})
+        </foreach>
+    </insert>
+
+    <select id="selectNoDividend" resultType="com.xzy.pojo.result.HmResult">
+        SELECT hr.* FROM hm_result hr
+        WHERE hr.status='WAITING'
+        AND result IS NOT NULL
+        AND action_time &lt;  UNIX_TIMESTAMP()-10
+        AND account_day BETWEEN DATE_ADD(CURDATE(), INTERVAL -1 DAY) AND CURDATE()
+    </select>
+
+    <select id="selectNoResultByZkc" resultType="com.xzy.pojo.result.HmResult">
+        SELECT * FROM hm_result WHERE lottery_id = #{lotteryId}
+        AND result IS NULL
+        AND action_time BETWEEN UNIX_TIMESTAMP()-300 AND UNIX_TIMESTAMP() ORDER BY game_no DESC LIMIT 1
+    </select>
+
+    <select id="selectLottery" resultType="com.xzy.pojo.ctrl.LotteryDO">
+            SELECT  * FROM hm_ctrl.t_lottery WHERE lottery_id = #{lotteryId}
+    </select>
+
+    <select id="spPayoutPk10Zk" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_PAYOUT_PK10_ZK(
+                #{lotteryId,mode=IN,jdbcType=INTEGER},
+                #{gameNo,mode=IN,jdbcType=VARCHAR},
+                #{resultStr,mode=IN,jdbcType=VARCHAR},
+                #{winAmt,mode=OUT,jdbcType=DECIMAL},
+                #{commAmt,mode=OUT,jdbcType=DECIMAL}
+          )
+        }
+    </select>
+    <select id="spPayoutSscZk" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_PAYOUT_SSC_ZK(
+                #{lotteryId,mode=IN,jdbcType=INTEGER},
+                #{gameNo,mode=IN,jdbcType=VARCHAR},
+                #{resultStr,mode=IN,jdbcType=VARCHAR},
+                #{winAmt,mode=OUT,jdbcType=DECIMAL},
+                #{commAmt,mode=OUT,jdbcType=DECIMAL}
+          )
+        }
+    </select>
+
+</mapper>

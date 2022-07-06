@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body>
+<div id="app">
+    <div class="x-body">
+        <form class="layui-form" >
+            <div class="layui-input-inline">
+                <input class="layui-input layui-btn-small" placeholder="选择日期" name="dateTime" id="dateTime" v-model="dateStr">
+            </div>
+            <div class="layui-input-inline">
+
+            </div>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-btn-small" @click="getHttpsAvgList()"> {{refreshTime}} 刷新</button>
+            </div>
+        </form>
+        <div>
+            <table class="layui-table" >
+                <thead>
+                <tr>
+                    <th width="10%">游戏</th>
+                    <th width="5%">总期数</th>
+                    <th width="8%">每期间隔</th>
+                    <th width="10%">未采集</th>
+                    <th >168网</th>
+                    <th >163网</th>
+                </tr>
+                </thead>
+                <tbody  >
+                <tr v-for="item in httpsItems">
+                    <td>{{item.lotteryName}}</td>
+                    <td>{{item.totalRound}}</td>
+                    <td>{{item.invlSecond}} s</td>
+                    <td>
+                        <a href="#1" style="color: blue" @click="getResultNullList(item.lotteryName,item.lotteryKey,getNullResult(item.lotteryKey))">
+                        <i v-if="getNullResult(item.lotteryKey)<=1" class="layui-icon" style="font-size: 20px;color: green">&#xe62e;</i>
+                        <i v-if="getNullResult(item.lotteryKey)>=3" class="layui-icon" style="font-size: 20px;color: red">&#xe62e;</i>
+                        <i v-if="getNullResult(item.lotteryKey)==2" class="layui-icon"style="font-size: 20px;color: orange">&#xe62e;</i>
+                       {{getNullResult(item.lotteryKey)}}</a>
+                    </td>
+                    <td>
+                        <span v-if="item.kai168">{{item.kai168.toFixed(2)}} s</span>
+                    </td>
+                    <td>
+                        <span style="color: red" v-if="'极速快乐十分,极速飞艇,澳洲幸运8,幸运农场'.indexOf(item.lotteryName)!=-1">
+                            - 未采集 - </span>
+                        <span v-if="item.kai163">{{item.kai163.toFixed(2)}} s</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <form class="layui-form" id="showModel" style="display:none;margin: 30px;">
+            <div style="margin-top: -15px">结果请输入在<span style="color:#ff0000;"> [ {{lotteryCodeNums}} ]  </span>区间的数字</div>
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th width="15%">游戏</th>
+                    <th width="15%">期数</th>
+                    <th width="25%">开奖时间</th>
+                    <th>结果输入</th>
+                </tr>
+                </thead>
+                <tbody  >
+                <tr v-for="item in resultNullItems">
+                    <td>{{lotteryName}}</td>
+                    <td>{{item.gameNo}}</td>
+                    <td>{{item.actionTimeStr}}</td>
+                    <td>
+                        <div class="layui-input-inline" v-for="k in item.result">
+                            <input type="number" class="layui-input" oninput="if(value.length>2)value=value.slice(0,2)"  style="width: 38px;margin-right: 5px" v-model="k.num"/>
+                        </div>
+                        <button type="button" class="layui-btn layui-btn-normal layui-btn-small" @click="putResultNull(item)">确认添加</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            countsItems: [],
+            httpsItems: [],
+            linkItems:[],
+            refreshTime: 10,
+            param:[Format(new Date(),"yyyy-MM-dd"),Format(new Date(),"yyyy-MM-dd")],
+            dateStr:Format(new Date(),"yyyy-MM-dd")+" - "+Format(new Date(),"yyyy-MM-dd"),
+            timer: null,
+            resultNullItems: [],
+            lotteryName:'',
+            lotteryItems:[],
+            lotteryCodeNums:"",
+            timerItems:[5,10,15,20]
+        },
+        methods: {
+            getHttpsAvgList() {
+                axios.get("/link/https/avg/"+this.param[0]+"/"+this.param[1]).then(res => {
+                    this.httpsItems = [];
+                    this.countsItems = [];
+                    if(res.data.success){
+                        this.countsItems = res.data.data.counts;
+                        this.httpsItems = res.data.data.avgList;
+                    }
+                })
+            },
+            getNullResult(key){
+                let countsItem = this.countsItems.find(v=>v.lotteryKey == key);
+                if(countsItem){
+                    return countsItem.counts;
+                }
+                return 0;
+            },
+            refreshList() {
+                clearInterval(this.timer);
+                this.timer = setInterval(() => {
+                    this.refreshTime -= 1;
+                    if (this.refreshTime == 0) {
+                        this.getHttpsAvgList();
+                        this.refreshTime = 10;
+                    }
+                }, 1200);
+            },
+            getResultNullList(lotteryName,lotteryKey,nullCounts) {
+                let _this = this;
+                _this.lotteryName = lotteryName;
+                if(nullCounts!=0){
+                    _this.resultNullItems = [];
+                    _this.lotteryCodeNums = "";
+                    axios.get("/link/result/list/"+lotteryKey+"/"+this.param[0]+"/"+this.param[1]).then(res => {
+                        if(res.data.success){
+                            _this.resultNullItems = res.data.data.nullList;
+                            if(_this.resultNullItems.length>0){
+                                _this.resultNullItems.forEach(items=>{
+                                    let nums = this.lotteryItems.find(v=>v.lotteryKey == items.lotteryKey);
+                                    _this.lotteryCodeNums = nums.codeNums;
+                                    let map = [];
+                                    for(let i=0;i<nums.resultSize;i++){
+                                        map.push({num:""})
+                                    }
+                                    items.result = map;
+                                })
+                                this.openInstallResult(lotteryName)
+                            }
+                        }
+                    })
+                }
+            },
+            putResultNull(item) {
+                let codeNums = this.lotteryCodeNums.split(",");
+                let errMsg = "";
+                let result = [];
+                item.result.forEach(ite=>{
+                    let err = codeNums.find(v=>v==ite.num);
+                    if(!err){
+                        errMsg += ""+ite.num+"，"
+                    }
+                    result.push(ite.num)
+                })
+                if(errMsg==""){
+                    item.result = result.join(",");
+                    this.resultNullItems.splice(this.resultNullItems.findIndex(i => i.id === item.id), 1)
+                    axios.put("/link/result",item).then(res => {
+                        if(res.data.success){
+                            layer.msg(res.data.data, {icon: 1,offset: 't'})
+                        }else{
+                            layer.msg('修改失败，请重新提交!', {icon: 5,offset: 't'})
+                        }
+                    })
+                }else{
+                    layer.msg('错误输入【 '+errMsg+' 】请输入正确的结果!', {icon: 5,offset: 't'})
+                }
+            },
+            openInstallResult(lotteryName){
+                layer.open({
+                    type:1,
+                    area:['1300px','700px'],
+                    title: lotteryName+', 未获取到结果集合',
+                    content: $("#showModel"),
+                    shade: 0,
+                    btn: []
+                    ,btn1: function(index, layero){
+                    },
+                    cancel: function(layero,index){
+                        layer.closeAll();
+                    }
+                });
+            }
+        },
+        mounted() {
+            let _this = this;
+            layui.use('laydate', function () {
+                let laydate = layui.laydate;
+                //执行一个laydate实例
+                laydate.render({
+                    elem: '#dateTime', //指定元素
+                    format: 'yyyy-MM-dd',// 设置显示格式
+                    range: true,
+                    done: value => { // 点击确认执行的回调函数，会把当前选择的时间传入进来
+                        // 把选择的时间赋值给先前定义好的变量，显示在页面
+                        _this.dateStr = value;
+                        _this.param = value.split(" - ");
+                        this.resultNullItems = [];
+                        _this.getHttpsAvgList();
+                    }
+                });
+            });
+            axios.get('/link/list')
+                .then(res => {
+                    if(res.data.success){
+                        this.linkItems = res.data.data;
+                    }
+                });
+            axios.get('/link/lotlist')
+                .then(res => {
+                    this.lotteryItems = [];
+                    if(res.data.success){
+                        this.lotteryItems = res.data.data;
+                    }
+                })
+            this.getHttpsAvgList();
+            this.refreshList();
+
+        },
+        destroyed() {
+            clearInterval(this.timer);
+        }
+    })
+</script>

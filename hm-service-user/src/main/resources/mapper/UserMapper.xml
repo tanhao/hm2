@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.user.dao.UserMapper">
+
+    <select id="selectUserListInfo" parameterType="com.xzy.pojo.user.request.UserRq"
+            resultType="com.xzy.pojo.user.response.UserInfo">
+        SELECT
+        hu.parent_id,
+        hu.parent_name,
+        hu.username,
+        hu.`status`,
+        hu.nick_name,
+        hu.user_level,
+        hu.created,
+        hu.user_type,
+        hu.login_ip_bound,
+        hu.disk,hu.bh_status,
+        hu.password_error,
+        (SELECT gain_odds from hm_user_base where user_id=hu.parent_id ) p_gain_odds,
+        (SELECT COUNT(1) from hm_user where parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='AGENT')
+        all_agent_count,
+        (SELECT COUNT(1) from hm_user where parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='MEMBER')
+        all_member_count,
+        (SELECT COUNT(1) from hm_user where parent_id = hub.user_id AND user_type='AGENT') agent_count,
+        (SELECT COUNT(1) from hm_user where parent_id = hub.user_id AND user_type='MEMBER') member_count,
+        hub.*,
+        IFNULL((SELECT SUM(credit_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='MEMBER'),0) member_credit_balance,
+        IFNULL((SELECT SUM(use_credit_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='MEMBER'),0) member_use_credit_balance,
+
+        IFNULL((SELECT SUM(recharge_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='MEMBER'),0) member_recharge_balance,
+        IFNULL((SELECT SUM(use_recharge_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='MEMBER'),0) member_use_recharge_balance,
+
+        IFNULL((SELECT SUM(credit_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='AGENT'),0) agent_credit_balance,
+        IFNULL((SELECT SUM(use_credit_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='AGENT'),0) agent_use_credit_balance,
+
+        IFNULL((SELECT SUM(recharge_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='AGENT'),0) agent_recharge_balance,
+        IFNULL((SELECT SUM(use_recharge_balance) FROM hm_user hu1,hm_user_base hub1 WHERE hu1.user_id = hub1.user_id AND
+        parent_path LIKE CONCAT('%,',hub.user_id,',%') AND user_type='AGENT'),0) agent_use_recharge_balance
+        FROM
+        hm_user hu,
+        hm_user_base hub
+        WHERE
+        hu.user_id = hub.user_id
+        <if test="userType!=null and userType=='agent'">
+            AND hu.user_type = 'AGENT'  AND  hu.parent_id = #{parentId}
+        </if>
+        <if test="userType!=null and userType=='allAgent'">
+            AND hu.user_type = 'AGENT'
+        </if>
+        <if test="userType!=null and userType=='member'">
+            AND hu.user_type = 'MEMBER' AND  hu.parent_id = #{parentId}
+        </if>
+        <if test="userType!=null and userType=='allMember'">
+            AND hu.user_type = 'MEMBER'
+        </if>
+        <if test="parentId!=null">
+            AND hu.parent_path LIKE CONCAT('%,',#{parentId},',%')
+        </if>
+        <if test="loginId!=null">
+            AND hu.parent_path LIKE CONCAT('%,',#{loginId},',%')
+        </if>
+        <if test="userId!=null">
+            AND hu.user_id = #{userId}
+        </if>
+        <if test="status!=null and status!='ALL'">
+            AND hu.`status`= #{status}
+        </if>
+        <if test="username!=null">
+            AND ( hu.username LIKE CONCAT('%',#{username},'%') OR hu.nick_name LIKE CONCAT('%',#{username},'%') )
+        </if>
+        <if test="reserveModel!=null and reserveModel!='ALL'">
+            AND hub.reserve_model= #{reserveModel}
+        </if>
+        order by  FIELD(hu.status, 'OPEN','SUSPEND', 'CLOSE') ,created desc
+    </select>
+
+    <select id="updateUserMarket" statementType="CALLABLE" parameterType="Map">
+        {
+          call SP_UPDATE_USER_MARKET(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{marketOpen,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="updateBaseGainOdds" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_UPDATE_GAIN_ODDS(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{gainOdds,mode=IN,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="updateBaseControlOdds" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_UPDATE_CONTROL_ODDS(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{controlOdds,mode=IN,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="updateBhStatus" statementType="CALLABLE" parameterType="Object">
+         {
+          call SP_UPDATE_BH_STATUS(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{bhStatus,mode=IN,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+    <select id="checkMaxUser"  parameterType="Object" resultType="Boolean">
+        SELECT IF(max_user>=total,1,0) can_use  FROM (
+        SELECT max_user,(SELECT COUNT(1) FROM hm_user u WHERE parent_path LIKE CONCAT('%,',b.user_id,',%') AND user_type='MEMBER' ) total
+        FROM hm_user_base b WHERE user_id=#{userId} ) da
+    </select>
+
+    <select id="insertCompnayInfo" statementType="CALLABLE">
+        {
+            CALL hm_ctrl.SP_CREATE_COMPNAY(
+                #{parentId,mode=IN,jdbcType=INTEGER},
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{regressA,mode=IN,jdbcType=FLOAT},
+                #{regressB,mode=IN,jdbcType=FLOAT},
+                #{regressC,mode=IN,jdbcType=FLOAT},
+                #{regressD,mode=IN,jdbcType=FLOAT},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <select id="insertAgent1Info" statementType="CALLABLE">
+        {
+            CALL hm_ctrl.SP_CREATE_AGENT1(
+                #{parentId,mode=IN,jdbcType=INTEGER},
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{isStandard,mode=IN,jdbcType=INTEGER},
+                #{regressA,mode=IN,jdbcType=FLOAT},
+                #{regressB,mode=IN,jdbcType=FLOAT},
+                #{regressC,mode=IN,jdbcType=FLOAT},
+                #{regressD,mode=IN,jdbcType=FLOAT},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+    <select id="insertAg2ToAg10Info" statementType="CALLABLE">
+        {
+            CALL hm_ctrl.SP_CREATE_AG2TOAG10(
+                #{parentId,mode=IN,jdbcType=INTEGER},
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{regressA,mode=IN,jdbcType=FLOAT},
+                #{regressB,mode=IN,jdbcType=FLOAT},
+                #{regressC,mode=IN,jdbcType=FLOAT},
+                #{regressD,mode=IN,jdbcType=FLOAT},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+    <update id="updateUserPreBh" parameterType="Object">
+        UPDATE hm_user_pre_pt
+        SET
+        <if test="ptBh!=null and ptBh!=false">
+            pt_bh= #{ptBh},
+        </if>
+        user_id = user_id
+        WHERE user_id IN (SELECT user_id FROM hm_user WHERE parent_path LIKE CONCAT('%,',#{userId},',%') )
+    </update>
+
+    <select id="updateUserPrePt"  statementType="CALLABLE" parameterType="Object">
+        {
+          call SP_UPDATE_USER_PRE_PT(
+                #{userId,mode=IN,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+    <select id="delUserId"  statementType="CALLABLE" parameterType="Object">
+        {
+          call SP_DELETE_USER(
+                #{userId,mode=IN,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+    <select id="selectLower" parameterType="Object" resultType="com.xzy.pojo.user.HmUser">
+        SELECT user_id ,username,nick_name FROM hm_user
+        where parent_id=#{userId}
+        <if test="disk!=null and disk!=''">
+            and disk=#{disk}
+        </if>
+         AND user_type='AGENT'
+    </select>
+
+    <select id="insertRunning" statementType="CALLABLE" parameterType="Map">
+        {
+          call SP_INSERT_RUNNING(
+                #{p_user_id,mode=IN,jdbcType=INTEGER},
+                #{p_category,mode=IN,jdbcType=VARCHAR},
+                #{p_operation,mode=IN,jdbcType=VARCHAR},
+                #{p_type,mode=IN,jdbcType=VARCHAR},
+                #{p_amount,mode=IN,jdbcType=DECIMAL},
+                #{p_create_by,mode=IN,jdbcType=VARCHAR},
+                #{p_ref_id,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="selectBalanceInfo" parameterType="Integer" resultType="com.xzy.pojo.user.response.BalanceInfo">
+        SELECT b.user_id, u.user_level, u.user_type, u.username, isnull(u.secondary) secondary,b.credit_balance balance, b.use_credit_balance useBalance,b.reserve_model, b.recharge_Balance recBalance, b.use_Recharge_Balance useRecBalance, sb.reserve_model  super_reserve_model,su.user_level super_level, su.username super_username, sb.credit_balance super_balance, sb.use_credit_balance super_use_balance,
+		sb.recharge_Balance super_rec_balance, sb.use_Recharge_Balance super_use_rec_balance
+        FROM hm_user_base b, hm_user u,  hm_user_base sb, hm_user su
+        WHERE b.user_id = u.user_id AND sb.user_id = su.user_id AND u.user_id = #{userId} AND sb.user_id = if(u.user_id=1,u.user_id,u.parent_id)
+    </select>
+
+    <select id="allRecovery" statementType="CALLABLE" parameterType="Map">
+        {
+          call SP_ALL_RECOVERY(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{reserveModel,mode=IN,jdbcType=VARCHAR},
+                #{updateBy,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+    <select id="nullMemBalance" statementType="CALLABLE" parameterType="Map">
+        {
+          call SP_NULL_MEM_BALANCE(
+                #{userId,mode=IN,jdbcType=INTEGER},
+                #{reserveModel,mode=IN,jdbcType=VARCHAR},
+                #{updateBy,mode=IN,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+    <select id="selectTodayInfo" parameterType="Object" resultType="com.xzy.pojo.user.response.MemBalanceInfo">
+        <!--SELECT hu.username, ROUND(IF(hb.reserve_model='RECHARGE',use_recharge_balance,use_credit_balance),2) balance,
+        ROUND(IF(hb.reserve_model='CREDIT',credit_balance,recharge_balance),2) credit,
+        ROUND(SUM(IF(tr.status='DIVIDEND',win_amt+IFNULL(bet_amt*comm_pct/100,0),0)),2) win_lose,
+        ROUND(SUM(IF(tr.status='WAITING',bet_amt,0)),2) bet_waiting,
+        ROUND(IFNULL( SUM(CASE WHEN TICKET_STATUS='DRAW' THEN 0 ELSE BET_AMT END),0 )) BET_AMT
+        FROM hm_user hu JOIN hm_user_base hb ON hu.user_id= hb.user_id AND hu.user_id= #{userId}
+        LEFT JOIN hm_order.hm_order tr ON hu.user_id=tr.user_id AND tr.account_day= #{accountDay}-->
+
+        SELECT hu.username,
+        ROUND(IF(hb.reserve_model='RECHARGE',use_recharge_balance,use_credit_balance),2) balance,
+        ROUND(IF(hb.reserve_model='CREDIT',credit_balance,recharge_balance),2) credit,
+        ROUND(IFNULL(ho.win_lose,0),2) win_lose,
+        ROUND(IFNULL(tr.bet_waiting,0),2) bet_waiting,
+        ROUND(IFNULL(ho.bet_amt,0)+IFNULL(tr.bet_amt,0),0) bet_amt
+        FROM hm_manage.hm_user hu
+        JOIN hm_manage.hm_user_base hb ON hu.user_id= hb.user_id AND hu.user_id= #{userId}
+        LEFT JOIN (SELECT
+        SUM(tr.bet_amt) bet_waiting,SUM(tr.BET_AMT) BET_AMT
+        FROM  hm_order.hm_order tr
+        WHERE tr.user_id =#{userId} AND tr.account_day= #{accountDay} AND tr.status='WAITING' ) tr ON 1=1
+        LEFT JOIN (
+        SELECT SUM(bet_win_amt+bet_odds_amt) win_lose,SUM(bet_amt) bet_amt
+        FROM hm_order.hm_order_daily_delivery WHERE user_id = #{userId} AND account_day= #{accountDay} ) ho ON 1=1
+    </select>
+
+    <select id="selSwitchStatus" parameterType="Object" resultType="com.xzy.pojo.user.response.UserInfo">
+        SELECT u.bh_status,ub.gain_odds,ub.control_odds
+        FROM hm_user u,hm_user_base ub where u.user_id=ub.user_id and u.user_id=#{userId}
+    </select>
+
+    <select id="updateUserIdLottery" parameterType="Object" >
+        update hm_ctrl.t_user_lottery set is_open_up=#{isOpenUp}
+        <if test="isOpenUp!=true and  isOpenUp!=null">
+            ,is_open_self=false
+        </if>
+        where id =#{id}
+    </select>
+
+    <select id="updateStopProfitLoss" parameterType="Object" >
+        update hm_user_base set
+        <if test="stopProfit!=0 and  stopProfit!=null">
+            stop_profit=#{stopProfit},
+        </if>
+        <if test="stopLoss!=0 and  stopLoss!=null">
+            stop_loss=#{stopLoss},
+        </if>
+        user_id = user_id
+        where user_id =#{userId}
+
+    </select>
+
+    <select id="selectRelationByUser"  resultType="String">
+        SELECT CONCAT('[',GROUP_CONCAT(g),']') FROM (
+        SELECT JSON_OBJECT("u",u.username,"l",u.user_level,'s',GROUP_CONCAT(s.username)) g
+        FROM hm_user u LEFT JOIN hm_user_son s
+             ON u.user_id = s.primary_id
+        WHERE  FIND_IN_SET(u.user_id,(SELECT CONCAT(parent_path,user_id) FROM hm_user WHERE username=#{username} )) AND u.user_id>1
+        GROUP BY u.username ORDER BY u.user_level ) da
+    </select>
+
+    <select id="selectRelationBySon" resultType="String">
+        SELECT CONCAT('[',GROUP_CONCAT(g),']') FROM (
+        SELECT JSON_OBJECT("u",u.username,"l",u.user_level,'s',GROUP_CONCAT(s.username)) g
+        FROM hm_user u  LEFT JOIN hm_user_son s ON u.user_id = s.primary_id
+        WHERE  FIND_IN_SET(u.user_id,(SELECT CONCAT(parent_path,user_id) FROM hm_user WHERE user_id =(SELECT primary_id FROM hm_user_son WHERE  username=#{username}) )) AND u.user_id>1
+        GROUP BY u.username ORDER BY u.user_level ) da
+    </select>
+</mapper>

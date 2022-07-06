@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.user.dao.MenuMapper">
+
+    <select id="selectByParentId" parameterType="Integer" resultType="com.xzy.pojo.user.HmMenu">
+
+        SELECT M.*,(SELECT COUNT(*) FROM HM_MENU C  WHERE C.PARENT_ID = M.MENU_ID ) AS sub_count
+        FROM HM_MENU M WHERE M.PARENT_ID = #{pId} ORDER BY SORT
+
+    </select>
+
+
+</mapper>

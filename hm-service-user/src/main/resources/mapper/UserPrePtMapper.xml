@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.user.dao.UserPrePtMapper">
+
+    <select id="selectUserPreByUserId" resultType="com.xzy.pojo.user.response.UserPrePtRp" parameterType="Integer">
+        SELECT hup.*,tl.lottery_name,tg.group_name FROM
+        hm_manage.hm_user_pre_pt hup,hm_ctrl.t_lottery tl,hm_ctrl.t_group  tg
+        WHERE hup.lottery_id=tl.lottery_id AND hup.user_id = #{userId}
+        AND tl.group_id= tg.group_id ORDER BY tl.ordering
+    </select>
+
+    <select id="selectUserMemberPreByUserId" resultType="com.xzy.pojo.user.response.UserPrePtRp" parameterType="Integer">
+         SELECT hup.*,tl.lottery_name,tg.group_name,u.username,u.user_level,u.user_type FROM
+        hm_manage.hm_user_pre_pt hup,hm_ctrl.t_lottery tl,hm_ctrl.t_group tg,hm_user u
+        WHERE hup.lottery_id=tl.lottery_id and u.user_id=hup.user_id  AND (FIND_IN_SET(hup.user_id,(SELECT parent_path FROM hm_user WHERE user_id = #{userId})) OR hup.user_id=#{userId})
+        AND tl.group_id= tg.group_id ORDER BY hup.lottery_id,tl.ordering,hup.user_id
+    </select>
+
+    <select id="selectUserActualPt" resultType="com.xzy.pojo.user.response.UserActualPt">
+        select hp.user_id,hp.lottery_id,hp.pt_pct,hp.pt_min_pct,hp.pt_max_pct,hu.user_level,hu.username,hu.user_type,hp.pre_pct,hp.pre_min_pct,hp.pre_max_pct,
+        IFNULL(LAG(pt_pct,1) OVER(partition by lottery_id order by lottery_id,user_level DESC),0) actual_pct,
+        IFNULL(LAG(pre_pct,1) OVER(partition by lottery_id order by lottery_id,user_level DESC),0) actual_pre_pt,ul.is_open_up,ul.is_open_self
+        from hm_user_pre_pt hp,hm_user hu, hm_ctrl.t_user_lottery ul
+        where  find_in_set(hp.user_id,(select concat(parent_path,user_id,',') from hm_user where user_id = #{userId}))
+        and hp.user_id = hu.user_id and hu.company_id=ul.user_id and ul.lottery_id= hp.lottery_id
+        order by lottery_id,user_level DESC
+    </select>
+
+    <update id="updateHmUserPrePt" parameterType="Object">
+        UPDATE hm_user_pre_pt
+        SET pt_pct= #{ptPct}, pt_min_pct= #{ptMinPct},pt_Max_pct= #{ptMaxPct}
+        WHERE user_id =#{userId} and lottery_id=#{lotteryId}
+    </update>
+
+    <update id="updateHmUserPresPt" parameterType="Object">
+        UPDATE hm_user_pre_pt
+        SET pre_pct= #{prePct}, pre_min_pct= #{preMinPct},pre_Max_pct= #{preMaxPct}
+        WHERE user_id =#{userId} and lottery_id=#{lotteryId}
+    </update>
+
+    <select id="updateUserPresPt"  statementType="CALLABLE" parameterType="Object">
+        {
+          call SP_UPDATE_USER_PRES_PT(
+                #{userId,mode=IN,jdbcType=INTEGER}
+          )
+        }
+    </select>
+
+</mapper>

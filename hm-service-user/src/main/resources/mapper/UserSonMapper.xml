@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.user.dao.UserSonMapper">
+
+    <select id="selHmUserSonLogIdList" parameterType="com.xzy.pojo.logs.request.HmLogsRq" resultType="com.xzy.pojo.logs.response.hmLogsInfo">
+        select l.*, i.address from hm_logs l , t_ipaddress i
+        where l.create_ip=i.ip and  l.user_id=#{userId}
+        <if test="startTime!=null and startTime!=''">
+            and create_time BETWEEN concat(#{startTime},' 00:00:00') AND concat(#{endTime},' 23:59:59')
+        </if>
+        ORDER BY l.create_time desc
+    </select>
+
+</mapper>

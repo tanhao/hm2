@@ -1,0 +1,373 @@
+﻿@charset "utf-8";
+
+/*useDoc.css*/
+.slidebar {
+    position: fixed;
+    top: 12px;
+    width: 194px;
+    border-top: 7px solid #2483D1;
+    background: #fff;
+    box-shadow: 0px 5px 6px rgba(0, 0, 0, .2); /*border-radius: 4px;*/
+    z-index: 10;
+}
+
+.slidebar .nav-lead {
+    position: relative;
+    text-decoration: none;
+    height: 39px;
+    padding: 0 55px;
+    border-bottom: 1px solid #E3E3E3;
+    line-height: 39px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2483D1;
+    display: block;
+}
+
+.slidebar .nav-lead span {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    width: 37px;
+    height: 22px;
+}
+
+.slidebar ul {
+    border-bottom: 1px solid #E3E3E3;
+}
+
+.slidebar ul li {
+    margin: 3px 0;
+}
+
+.slidebar ul li a {
+    position: relative;
+    color: #838383;
+    font-size: 14px;
+    text-decoration: none;
+    display: block;
+    height: 32px;
+    line-height: 32px;
+}
+
+.slidebar ul li a:hover, .slidebar ul li a.act {
+    background-color: #0088fe;
+    color: #fff;
+}
+
+.slidebar ul li a:hover span, .slidebar ul li a.act span {
+
+}
+
+.slidebar ul li a span {
+    position: absolute;
+    left: 27px;
+    width: 20px;
+    height: 28px;
+
+}
+
+.article {
+    line-height: 2.5;
+    padding: 0 0 0 207px;
+    font-size: 14px;
+}
+
+.article img {
+    margin: 5px 0;
+    max-width: 98%;
+}
+
+.article .section ol {
+    padding: 0 15px 10px 33px;
+    list-style: decimal;
+}
+
+
+/*site.css*/
+#tab ul.btn {
+    border: 1px solid #E3E3E3;
+    overflow: hidden;
+    margin: 10px 0 0 0;
+    background: #fff;
+    border-width: 0 0 1px 1px;
++ border-width: 0 0 1 px 0;
+}
+
+#tab ul.btn li {
+    float: left;
+    display: inline;
+    width: 20%;
+}
+
+#tab ul.btn li a {
+    position: relative;
+    border-right: 1px solid #E3E3E3;
+    border-top: 1px solid #E3E3E3;
+    height: 60px;
+    line-height: 62px;
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    color: #2483D1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#tab ul.btn li a.act {
+    background: #FBFAF8;
+    border-top: 2px solid #2483D1;
+}
+
+#tab ul.btn li a span, #tab ul.btn li a.act span {
+    position: absolute;
+    left: 27px;
+    top: 16px;
+    width: 32px;
+    height: 30px;
+
+}
+
+#tab ul.btn li a img {
+    margin-right: 8px;
+    margin-top: 16px;
++ vertical-align: middle;
++ margin-top: 4 px;
+}
+
+.section {
+    overflow: hidden;
+    padding-bottom: 12px;
+}
+
+.section ul li {
+    float: left;
+    display: inline;
+    margin: 15px 0 0 18px;
+}
+
+.section ul li a {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    width: 308px;
+    height: 172px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.section ul li a h3 {
+    font-size: 28px;
+    height: 100%;
+    line-height: 172px;
+    font-weight: 600;
+}
+
+.section ul li a p {
+    background: #333;
+    background: rgba(0, 0, 0, 0.5);
+    filter: alpha(opacity=50);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+    z-index: 2;
+    bottom: 0px;
+    left: 0;
+}
+
+.section ul li a .shadow {
+    opacity: 0;
+    height: 0;
+    width: 0;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    z-index: 1;
+}
+
+.purple {
+    background-color: #9079B6;
+}
+
+.red {
+    background-color: #D76A1E;
+}
+
+.yellow {
+    background-color: #E1C168;
+}
+
+.blue {
+    background-color: #30AAEC;
+}
+
+.dark-blue {
+    background-color: #2D89EF;
+}
+
+.orange {
+    background-color: #F59F69;
+}
+
+.lighter-blue {
+    background-color: #4ECDC4;
+}
+
+.dark-green {
+    background-color: #1FA67A;
+}
+
+.brown {
+    background-color: #6D3353;
+}
+
+.green {
+    background-color: #2B9445;
+}
+
+.lighter-green {
+    background-color: #1ABC9C;
+}
+
+.chi {
+    background-color: #D6595C;
+}
+
+.gray {
+    background-color: #ddd;
+}
+
+/*text.css*/
+.content {
+    color: #737373;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    z-index: -1060;
+    line-height: 32px;
+    min-height: 340px;
+}
+
+.content h5 {
+    font-size: 16px;
+    font-weight: bolder;
+}
+
+.content p {
+    margin-top: 1em;
+    margin-bottom: 0.4em;
+    text-indent: 2em;
+    letter-spacing: 1px;
+    line-height: 20px;
+    font-family: '微软雅黑', "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif, 'Tahoma';
+    font-size: 13px;
+}
+
+.content a {
+    color: #428bca;
+    text-decoration: none;
+}
+
+.content a:hover, .content a:focus {
+    color: #2a6496;
+    text-decoration: underline;
+}
+
+/*warning.css*/
+.warn-section {
+    line-height: 32px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.warn-section h2 {
+    font-size: 24px;
+    color: #333;
+}
+
+.warn-section span {
+    display: inline-block;
+    text-align: left;
+    padding: 40px 10px;
+}
+
+.warn-section span img {
+    float: left;
+    margin-top: 30px;
+}
+
+.warn-section span .text {
+    float: left;
+    margin: 28px 0 0 50px;
+}
+
+.warn-section span p {
+    font-size: 15px;
+    white-space: nowrap;
+    margin: 10px 0 0 0;
+}
+
+.warn-section span p a {
+    color: #09A3DC;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.text .btn {
+    margin: 10px 13px 0 0;
+    cursor: pointer;
+    transition: all 0.4s;
+    background-color: #09A3DC;
+    display: inline-block;
+    padding: 10px 12px;
+    font-size: 100%;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+    text-decoration: none;
+}
+
+.text .btn:hover {
+    background: #3CC3F5;
+}
+
+.warn-section ul li {
+    float: left;
+    margin: 30px 0 20px 18px;
+    border: 1px solid #D1D1D1;
+}
+
+/*intro.css*/
+.content table {
+    font-size: 13px;
+    border-width: 1px;
+    border-color: #a9c6c9;
+    border-collapse: collapse;
+}
+
+.content table th {
+    border-width: 1px;
+    padding: 8px;
+    border: 1px solid #a9c6c9;
+    text-align: left;
+}
+
+.content table td {
+    padding: 8px;
+    border: 1px solid #a9c6c9;
+}
+
+.oddrowcolor {
+    background-color: #d4e3e5;
+}
+
+.evenrowcolor {
+    background-color: #c3dde0;
+}

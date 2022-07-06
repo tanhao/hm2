@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.CategoryMapper">
+
+    <select id="listCategorys" resultType="com.xzy.pojo.ctrl.CategoryDO">
+        select * from t_category order by kind_id,ordering
+    </select>
+    <select id="listCategorysByLotteryId" resultType="com.xzy.pojo.ctrl.CategoryDO">
+        select * from t_category
+        where kind_id in ( select kind_id from t_kind where group_id=(select group_id from t_lottery where lottery_id=#{lotteryId}) )
+        order by kind_id,ordering
+    </select>
+
+</mapper>

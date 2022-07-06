@@ -1,0 +1,38 @@
+{
+  "xyft": {
+    "url": "https://1680610.com/api/pks/getPksHistoryList.do?lotCode=10057&date=%s"
+  },
+  "speed10": {
+    "url": "https://1680610.com/api/pks/getPksHistoryList.do?lotCode=10037&date=%s"
+  },
+  "sbspeed10": {
+    "url": "https://1680610.com/api/pks/getPksHistoryList.do?lotCode=10035&date=%s"
+  },
+  "lucky10": {
+    "url": "https://1680610.com/api/pks/getPksHistoryList.do?lotCode=10012&date=%s"
+  },
+  "jsssc": {
+    "url": "https://1680610.com/api/CQShiCai/getBaseCQShiCaiList.do?lotCode=10036&date=%s"
+  },
+  "lucky5": {
+    "url": "https://1680610.com/api/CQShiCai/getBaseCQShiCaiList.do?lotCode=10010&date=%s"
+  },
+  "lucky8": {
+    "url": "https://1680610.com/api/klsf/getHistoryLotteryInfo.do?lotCode=10011&date=%s"
+  },
+  "speed8": {
+    "url": "https://1680610.com/api/klsf/getHistoryLotteryInfo.do?lotCode=10053&date=%s"
+  },
+  "lucky20": {
+    "url": "https://1680610.com/api/LuckTwenty/getBaseLuckTwentyList.do?lotCode=10013&date=%s"
+  },
+  "jskl8": {
+    "url": "https://1680610.com/api/LuckTwenty/getBaseLuckTwentyList.do?lotCode=10054&date=%s"
+  },
+  "jsdd": {
+    "url": "https://1680610.com/api/LuckTwenty/getPcLucky28List.do?lotCode=10081&date=%s"
+  },
+  "pcdd": {
+    "url": "https://1680610.com/api/LuckTwenty/getPcLucky28List.do?lotCode=10074&date=%s"
+  }
+}

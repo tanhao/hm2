@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+
+<body>
+<div id="app">
+    <div class="x-body">
+        <table class="layui-table" >
+            <thead>
+            <tr>
+                <th width="10%" rowspan="2">游戏</th>
+                <th width="10%" colspan="2">热门彩</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>选中</th>
+                <th>排序</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody  v-for="(item,j) in lotteryItems">
+            <tr>
+                <td>{{item.lotteryName}}</td>
+                <td >
+                    <div class="layui-form" style="padding: 0px;">
+                        <div class="layui-input-block" style="margin-left: 0px;min-height: 0px;" @click="changeChk(item,item.hotChk==1?0:1)">
+                            <input type="checkbox" lay-skin="primary" :name="item.lotteryKey" :checked="item.hotChk==1?'checked':''" >
+                            <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><i class="layui-icon layui-icon-ok"></i></div>
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align: center">
+                    <div style="margin-left: 0px;min-height: 0px;width: 38px;margin-right: 5px">
+                        <input type="number" class="layui-input" oninput="if(value.length>3)value=value.slice(0,3)"  v-model="item.hotSort" @change="changeSort(item)"/>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            lotteryItems: [],
+            dateStr:Format(new Date(),"yyyy-MM-dd"),
+            linkItems:[],
+        },
+        methods: {
+            getLotteryList() {
+                this.lotteryItems = [];
+                axios.get("/link/lotlist").then(res => {
+                    if(res.data.success) {
+                        let arr = res.data.data;
+                        const handle = (res) => {
+                            return function(a,b){
+                                const val1 = a[res];
+                                const val2 = b[res];
+                                return val1 - val2;
+                            }
+                        }
+                        arr.sort(handle('hotSort'));
+                        this.lotteryItems = arr;
+                    }
+                })
+            },
+            changeChk(item,chk){
+                item.hotChk = chk;
+                axios.put("/lot/change",item).then(res => {
+                    if(res.data.success) {
+
+                    }
+                })
+            },
+            changeSort(item){
+                axios.put("/lot/change",item).then(res => {
+                    if(res.data.success) {
+                        this.getLotteryList();
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.getLotteryList();
+        },
+        updated(){
+
+        },
+    })
+</script>

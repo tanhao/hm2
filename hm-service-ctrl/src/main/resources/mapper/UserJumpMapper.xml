@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserJumpMapper">
+
+    <select id="listUserJumpDOs" resultType="com.xzy.pojo.ctrl.UserJumpDO">
+        select * from t_user_jump where user_id=#{userId}
+    </select>
+
+    <select id="updateJump" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.JumpRQ">
+        {
+            CALL SP_UPDATE_JUMP(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+         }
+    </select>
+
+</mapper>

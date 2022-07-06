@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserOddsJumpMapper">
+
+    <select id="listUserOddsJumpDOs"  resultType="com.xzy.pojo.ctrl.bo.UserOddsJumpBO">
+        select u.user_level,o.odds_id,o.odds
+        from t_user_odds_jump o,
+        (select * from hm_manage.hm_user where (user_level=2 OR user_level=3) and find_in_set(user_id,(select CONCAT(parent_path,user_id,',') from hm_manage.hm_user where user_id=#{userId}))) u
+        where o.lottery_id=#{lotteryId} and o.user_id=u.user_id
+    </select>
+
+    <select id="listOddsJumpDOs"  resultType="com.xzy.pojo.ctrl.bo.UserOddsJumpBO">
+        select lottery_id,u.user_id,u.user_level,o.odds_id,o.odds
+        from t_user_odds_jump o left join hm_manage.hm_user u on o.user_id=u.user_id
+        where o.update_time>=#{updateTime}
+    </select>
+
+    <select id="getDBNow"  resultType="Integer">
+        select UNIX_TIMESTAMP()
+    </select>
+</mapper>

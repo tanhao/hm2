@@ -1,0 +1,295 @@
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>线路检测</title>
+    <link href="css/all.css" rel="stylesheet">
+    <link href="css/font-awesome.css" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE11">
+    <link rel="icon" href="favicon.ico">
+    <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
+</head>
+<body>
+
+<div class="Testing">
+    <div class="Testing_main">
+        <p class="p30">网络线路检测中心</p>
+        <p class="p p20">
+            <script type="text/javascript">
+                if (typeof (returnCitySN) === "undefined")/ {
+                    var returnCitySN = {
+                        "cip": "122.49.219.12",
+                        "cid": "PH",
+                        "cname": "PHILIPPINES"
+                    };
+                }
+                document.write('您的IP地址：' + returnCitySN["cip"]+','+returnCitySN["cname"])
+            </script>
+        </p>
+        <p class="p">温馨提示：反应时间越小，网站速度越快。</p>
+        <div class="linelist testable">
+            <!-- 会员手机端 -->
+            <ul id="memh5_ul">
+                <div>
+                    <div style="margin: 12px 0; color: #0088fe; font-size: 18px;text-align: center;display: table;width:100%;;">
+                        会员手机端
+                    </div>
+                </div>
+                <!-- <li class="">
+                     <p><img alt="" src="images/lineicon3.png">
+                         <b>50 ms</b>
+                         <span id="url0">https://1039.hm328.co</span>
+                         <a id="click_url_0" href="https://1039.hm328.co" title="https://1039.hm328.co">进入网站</a>
+                     </p>
+                 </li>-->
+            </ul>
+            <!-- 会员电脑端 -->
+            <ul id="mempc_ul">
+                <div>
+                    <div style="margin: 12px 0; color: #0088fe; font-size: 18px;text-align: center;display: table;width:100%;;">
+                        会员电脑端
+                    </div>
+                </div>
+            </ul>
+            <!-- 代理 -->
+            <ul id="agpc_ul">
+                <div>
+                    <div style="margin: 12px 0; color: #0088fe; font-size: 18px;text-align: center;display: table;width:100%;;">
+                        代理
+                    </div>
+                </div>
+            </ul>
+
+
+        </div>
+        <input onclick="location.reload()" type="button" value="重新检测">
+        <p class="p25">合作软件</p>
+        <div class="hzhb">
+            <ul style="display: table; width: 100%;">
+                <li>
+                    <p>智投软件</p>
+                    <span><a target=_blank href="#" target="_blank">LV</a></span>
+                    <span><a target=_blank href="#" target="_blank">888</a></span>
+                    <span><a target=_blank href="#" target="_blank">如意</a></span>
+                </li>
+                <li>
+                    <p>跟单软件</p>
+                    <span><a target=_blank href="#" target="_blank">LV</a></span>
+                    <span><a target=_blank href="#" target="_blank">888</a></span>
+                    <span><a target=_blank href="#" target="_blank">如意</a></span>
+                </li>
+                <li>
+                    <p>机械人</p>
+                    <span><a target=_blank href="#" target="_blank">微单</a></span>
+                    <span><a target=_blank href="#" target="_blank">奇迹</a></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="Testing_footer">
+        <div>
+            <h6>如果检测后不能登录请按以下方式操作：</h6>
+            <h6>A.打开IE浏览器:</h6>
+            <p> 打开IE浏览器，选择：工具-&gt; Internet选项-&gt; 再选择 (删除 </p>
+            <p>历史浏览记录)-&gt; 删除-&gt; 重启IE</p>
+            <h6>B.如果您体验过程中出现卡顿：</h6>
+            <p>请在您打开本界面选择其它线路看看。</p>
+        </div>
+        <div>
+            <h6>登陸接口 <a style="color : #0088fe;" target=_blank  href="http://114.112.240.50/oddsIds.zip">点这里</a></h6>
+            <h6>如果我们的检测中心对您有帮助，请按 Ctrl+D收藏 </h6>
+            <p>如果您在访问我们域名时被跳转到其它网站，那是您当地电信运 </p>
+            <p>营商dns被劫持。</p>
+            <h6>反劫持教程请参考：<a style="color : #0088fe;" target=_blank  href="dns.html">这里</a>,</h6>
+            <p>您可以通过修改电脑本地dns来解决</p>
+        </div>
+        <div>
+            <h6>为了保证最佳使用体验，请保证您的屏幕分辨率在 1280 及以上</h6>
+            <p>若使用IE浏览器，请使用 IE10 及以上版本 </p>
+            <p>推荐您使用以下浏览器：</p>
+            <img src="images/goole.png">
+        </div>
+    </div>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.speedtest.js"></script>
+<script>
+
+    $(document).ready(function () {
+        var code=getQueryString("code");
+        $.ajax({
+            type: "GET",
+            url: "/siteCode/"+code+"/ALL",
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            dataType: "json",
+            success: function (success) {
+                var inf = success.data;
+                getLoadingDiv(inf);
+            }, error: function (response) {
+            }
+        });
+    });
+    function getQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        }
+    }
+
+    function getLoadingDiv(inf) {
+        for (var i = 0; i < inf.length; i++) {
+            var item = inf[i];
+            var tmpl ='<li class=""> ';
+            tmpl+=' <p><img alt="" src="images/lineicon3.png">';
+            tmpl+=' <b><span id="limit_'+i+'">--</span> ms</b>';
+            tmpl+='  <span>'+(item.url||"暂无")+'</span>';
+            if(item.url) {
+                tmpl+=' <a target=_blank class="go-btn" data-id="' + i + '" data-url="' + item.url + '" title="' + item.url + '" href="' + item.url + '">进入</a>' ;
+            }else{
+                tmpl+=' <a>进入网站</a>';
+            }
+            tmpl+=' </p>';
+            tmpl+='</li>';
+            if (item.type == '会员H5') {
+                $("#memh5_ul").append(tmpl);
+            } else if (item.type == '会员PC') {
+                $("#mempc_ul").append(tmpl);
+            } else if (item.type == '代理PC') {
+                $("#agpc_ul").append(tmpl);
+            }
+        }
+        $('.go-btn').each(function () {
+            var id = $(this).attr('data-id');
+            var url = $(this).attr('data-url');
+            var img = "/img/cs.0d5b6438.jpg";
+            $('#limit_' + id)._speedTest({
+                fileSize: 2000,
+                fileType: "image",
+                fileUrl: url + img
+            });
+        })
+    }
+</script>
+<script>
+    //判断访问终端
+    var browser = {
+        versions: function () {
+            var u = navigator.userAgent,
+                app = navigator.appVersion;
+            return {
+                trident: u.indexOf('Trident') > -1, //IE内核
+                presto: u.indexOf('Presto') > -1, //opera内核
+                webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+                mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+                ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+                android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+                iPhone: u.indexOf('iPhone') > -1, //是否为iPhone或者QQHD浏览器
+                iPad: u.indexOf('iPad') > -1, //是否iPad
+                webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+            };
+        }(),
+        language: (navigator.browserLanguage || navigator.language).toLowerCase()
+    }
+    if (browser.versions.mobile || browser.versions.android || browser.versions.ios) {
+        //$(location).attr('href', 'https://www.test.com/');
+    }
+
+    // var system = {};
+    // var p = navigator.platform;
+    // var url = "http://testapi.67888288.co"; //默认显示手机端域名
+    // system.win = p.indexOf("Win") == 0;
+    // system.mac = p.indexOf("Mac") == 0;
+    // system.x11 = (p == "X11") || (p.indexOf("Linux") == 0);
+    // if (system.win || system.mac || system.xll) { //如果是电脑跳
+    // 	//$("#coursetype").attr("href","http://baidu.com"); //转到电脑版教程
+    // 	//$("#coursetype").text("http://baidu.com");
+    // 	url = "https://2102.hm328.co,https://1039.hm328.co,https://3252.hm328.co"; //电脑版域名
+    // }
+
+    // $("#iphone").click(function() {
+    // 	$("#2weima").toggle();
+    // });
+
+    // var autourl = url.split(',');
+    // $(function() {
+    // 	var urltxt = "";
+    // 	if (!Array.prototype.forEach) {
+    // 		Array.prototype.forEach = function(callback, thisArg) {
+    // 			var T, k;
+    // 			if (this == null) {
+    // 				throw new TypeError(" this is null or not defined");
+    // 			}
+    // 			var O = Object(this);
+    // 			var len = O.length >>> 0; // Hack to convert O.length to a UInt32
+    // 			if ({}.toString.call(callback) != "[object Function]") {
+    // 				throw new TypeError(callback + " is not a function");
+    // 			}
+    // 			if (thisArg) {
+    // 				T = thisArg;
+    // 			}
+    // 			k = 0;
+    // 			while (k < len) {
+    // 				var kValue;
+    // 				if (k in O) {
+    // 					kValue = O[k];
+    // 					callback.call(T, kValue, k, O);
+    // 				}
+    // 				k++;
+    // 			}
+    // 		};
+    // 	}
+    // 	autourl.forEach(function(val, i) {
+    // 		urltxt += '<li><label>';
+    // 		urltxt += '<span class="testing" id="txt' + i + '"></span></label><p><span id="url' + i + '">' + val;
+    // 		urltxt += '</span><a id="click_url_' + i + '" href="' + val + '" title="' + val + '">进入网站</a></p></li>';
+    // 		urltxt += '<li>';
+    // 		urltxt += '<span class="testing" id="txt' + i + '"></span><p><span id="url' + i + '">' + val;
+    // 		urltxt += '</span><a id="click_url_' + i + '" href="' + val + '" title="' + val + '">进入网站</a></p></li>';
+    // 	});
+    // 	$('.testable').empty().append(urltxt);
+    // 	$("#j-app-btn").live("click",
+    // 		function toggle() {
+    // 			$(".masksao").show();
+    // 		}
+    // 	);
+    // 	$(".masksao").live("click",
+    // 		function toggle() {
+    // 			$(".masksao").hide();
+    // 		}
+    // 	);
+    // });
+
+    // function auto(url) {
+    // 	$("#url" + b).html(url);
+    // 	$("#click_url_" + b).attr("href", url);
+    // 	$("#click_url_" + b).attr("title", url);
+    // 	if (tim > 20) {
+    // 		$("#txt" + b).html('连接<br/>超时').addClass('testerror');
+    // 		$("#txt" + b).parent().parent("li").addClass('li');
+    // 	} else {
+    // 		$("#txt" + b).html(tim * 10 + "<br/>" + "ms").addClass('testdone');
+    // 		$("#txt" + b).parent().parent("li").removeClass('li');
+    // 	}
+    // 	b++;
+    // }
+
+    // function execAuto() {
+    // 	tim = 1;
+    // 	b = 0;
+    // 	var html2str = '';
+    // 	autourl.forEach(function(val, i) {
+    // 		html2str += "<img src='" + val + "?" + Math.random() + "' width='1' height='1' onerror=\"auto('" + val +
+    // 			"');\" style='display:none'>";
+    // 	});
+    // 	$("#site1_peed").empty().append(html2str);
+    // }
+    // setInterval("tim++", 100);
+    // execAuto();
+</script>
+
+
+</body>
+</html>

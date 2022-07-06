@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.logs.dao.IpAddressMapper">
+
+    <select id="selectByIps" resultType="com.xzy.pojo.logs.IpAddress">
+        SELECT * FROM hm_logs.T_IPADDRESS WHERE IP IN
+        <foreach item="item" collection="items" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateIpAddress">
+			UPDATE hm_logs.T_IPADDRESS set ADDRESS=#{address} WHERE ID = #{id}
+	</update>
+
+    <select id="selectAddressIsNull" resultType="com.xzy.pojo.logs.IpAddress">
+        	SELECT * FROM hm_logs.T_IPADDRESS WHERE address is null OR address=''
+    </select>
+
+</mapper>

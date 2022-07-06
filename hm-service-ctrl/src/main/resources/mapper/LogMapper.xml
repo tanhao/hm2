@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.LogMapper">
+    <select id="getLogCtrl" resultType="com.xzy.pojo.ctrl.response.LogRP">
+        SELECT u.user_id,u.username,r.game_no,k.kind_name,c.category_name,o.odds_name,p.play_name,r.detail,r.update_ip,i.address update_addr,r.update_by,r.update_time,r.type
+        FROM (
+            <![CDATA[
+            SELECT * FROM t_user_odds_log
+            WHERE update_time>=#{startTime} AND update_time<=#{endTime} AND lottery_id=#{lotteryId}
+            ]]>
+            <if test="kindId!=null and kindId!=''">
+                AND kind_id=#{kindId}
+            </if>
+            <if test="categoryId!=null and categoryId!=''">
+                AND category_id=#{categoryId}
+            </if>
+            <if test="oddsId!=null and oddsId!=''">
+                AND odds_id=#{oddsId}
+            </if>
+            <if test="playId!=null and playId!=''">
+                AND play_id=#{playId}
+            </if>
+            <if test="gameNo!=null and gameNo!=''">
+                AND game_no=#{gameNo}
+            </if>
+            <if test="userId!=null and userId!=''">
+                AND user_id=#{userId}
+            </if>
+            LIMIT #{pageStart},#{pageSize}
+        )r
+        LEFT JOIN t_kind k ON k.kind_id=r.kind_id
+        LEFT JOIN t_category c ON c.category_id=r.category_id
+        LEFT JOIN t_odds o ON o.odds_id=r.odds_id
+        LEFT JOIN t_play p ON p.play_id=r.play_id
+        LEFT JOIN hm_manage.hm_user u ON u.user_id=r.user_id
+        LEFT JOIN hm_logs.t_ipaddress i ON i.ip=r.update_ip
+
+    </select>
+
+    <resultMap id="gameNoResult" type="java.lang.String" >
+        <result column="game_no" property="game_no" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id="listGameNos" resultMap="gameNoResult">
+        <![CDATA[
+        SELECT game_no FROM hm_order.hm_result WHERE lottery_id=#{lotteryId} AND open_time>=#{startTime} AND open_time<=#{endTime} ORDER BY game_no DESC
+        ]]>
+    </select>
+
+    <select id="getLogZhuanRegress">
+    </select>
+
+    <select id="getLogZhuanOdds"  resultType="com.xzy.pojo.ctrl.response.LogRP">
+        select  u.username,l.user_id,k.kind_name,c.category_name,l.detail,l.update_by,l.update_ip,ifnull(i.address,l.update_ip) update_addr,l.update_time
+        from (
+            select * from t_user_odds_zhuan_log WHERE  update_time>=#{startTime} AND   <![CDATA[ update_time<=  ]]>#{endTime} AND lottery_id=#{lotteryId}
+            <if test="userId!=null and userId!=''">
+                AND user_id=#{userId}
+            </if>
+            order by id desc limit #{pageStart},#{pageSize}
+        ) l
+        left join t_category c on c.category_id=l.category_id
+        left join t_kind k on k.kind_id=c.kind_id
+        left join hm_logs.t_ipaddress i on i.ip=l.update_ip
+        left join hm_manage.hm_user u on u.user_id=l.user_id
+    </select>
+
+    <select id="getLogOdds">
+
+    </select>
+
+    <select id="getLogCtrlTotal" resultType="Integer">
+        <![CDATA[
+        SELECT count(*) FROM t_user_odds_log
+        WHERE update_time>=#{startTime} AND update_time<=#{endTime} AND lottery_id=#{lotteryId}
+        ]]>
+        <if test="kindId!=null and kindId!=''">
+            AND kind_id=#{kindId}
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND category_id=#{categoryId}
+        </if>
+        <if test="oddsId!=null and oddsId!=''">
+            AND odds_id=#{oddsId}
+        </if>
+        <if test="playId!=null and playId!=''">
+            AND play_id=#{playId}
+        </if>
+        <if test="gameNo!=null and gameNo!=''">
+            AND game_no=#{gameNo}
+        </if>
+        <if test="userId!=null and userId!=''">
+            AND user_id=#{userId}
+        </if>
+    </select>
+    <select id="getLogZhuanRegressTotal" resultType="Integer">
+    </select>
+    <select id="getLogZhuanOddsTotal" resultType="Integer">
+        SELECT count(*) FROM t_user_odds_zhuan_log
+        WHERE update_time>=#{startTime} AND  <![CDATA[ update_time<= ]]> #{endTime}  AND lottery_id=#{lotteryId}
+        <if test="userId!=null and userId!=''">
+            AND user_id=#{userId}
+        </if>
+    </select>
+    <select id="getLogOddsTotal" resultType="Integer">
+    </select>
+
+    <select id="getLogLimit" resultType="com.xzy.pojo.ctrl.response.LogRP">
+        select  u.username,l.user_id,k.kind_name,l.detail,l.update_by,l.update_ip,ifnull(i.address,l.update_ip) update_addr,l.update_time
+        from (
+            select * from t_user_limit_log WHERE update_time>=#{startTime} AND   <![CDATA[ update_time<=  ]]>#{endTime} AND lottery_id=#{lotteryId}
+            <if test="userId!=null and userId!=''">
+                AND user_id=#{userId}
+            </if>
+            order by id desc limit #{pageStart},#{pageSize}
+        ) l
+        left join t_kind k on k.kind_id=l.kind_id
+        left join hm_logs.t_ipaddress i on i.ip=l.update_ip
+        left join hm_manage.hm_user u on u.user_id=l.user_id
+
+
+    </select>
+    <select id="getLogLimitTotal" resultType="Integer">
+        SELECT count(*) FROM t_user_limit_log
+        WHERE update_time>=#{startTime} AND  <![CDATA[ update_time<= ]]> #{endTime} AND lottery_id=#{lotteryId}
+        <if test="userId!=null and userId!=''">
+            AND user_id=#{userId}
+        </if>
+    </select>
+
+</mapper>

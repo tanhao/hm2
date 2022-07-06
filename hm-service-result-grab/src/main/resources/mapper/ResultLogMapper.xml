@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.ResultLogMapper">
+
+    <select id="findResultLogByDay" resultType="com.xzy.result.vo.ResultLogVo">
+        select * from t_result_log where update_time between #{startDate} and #{endDate}
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.order.dao.OrderMapper">
+
+    <select id="findGameNo" resultType="Long">
+        <![CDATA[
+
+        SELECT game_no FROM hm_result WHERE lottery_id = #{lotteryId} AND account_day=#{accountDay} AND action_time <UNIX_TIMESTAMP() ORDER BY game_no DESC
+
+        ]]>
+    </select>
+
+    <select id="getDayReports" resultType="com.xzy.pojo.order.response.ReportRp">
+        SELECT * FROM (
+        SELECT ACCOUNT_DAY,COUNT(1) TICKET_NUM,SUM(BET_AMT) BET_AMT,SUM(CASE WHEN TICKET_STATUS='DRAW' THEN 0 ELSE BET_AMT END) ACT_AMT,
+        SUM(WIN_AMT) WIN_AMT,SUM(BET_AMT*COMM_PCT/100) COMM
+        FROM HM_ORDER WHERE USER_ID=#{userId}
+
+        <if test="lotteryId!=null">
+            AND lottery_id = #{lotteryId}
+        </if>
+        AND ACCOUNT_DAY>=#{accountDay}
+
+        <if test="winOrLoserState=='WAITING' or winOrLoserState=='CANCEL' or winOrLoserState=='VOID'">
+            AND STATUS=#{winOrLoserState}
+        </if>
+
+        <if test="winOrLoserState=='DIVIDEND'">
+            AND (STATUS='DIVIDEND' OR STATUS='REDIVIDEND')
+        </if>
+        <if test="winOrLoserState=='WIN' or winOrLoserState=='LOSE'">
+             AND TICKET_STATUS = #{winOrLoserState} AND (STATUS='DIVIDEND' OR STATUS='REDIVIDEND')
+        </if>
+        <if test="winOrLoserState==null">
+            AND (STATUS='DIVIDEND' OR STATUS='REDIVIDEND')
+        </if>
+
+        GROUP BY ACCOUNT_DAY
+        ) TR ORDER BY ACCOUNT_DAY
+
+    </select>
+
+    <select id="getDayReportsTwo" resultType="com.xzy.pojo.order.response.ReportRp">
+        SELECT ACCOUNT_DAY,COUNT(1) TICKET_NUM,SUM(BET_AMT) BET_AMT,SUM(BET_AMT) ACT_AMT,
+        SUM(BET_WIN_AMT) WIN_AMT,SUM(BET_ODDS_AMT) COMM
+        FROM hm_order_daily_delivery WHERE  ACCOUNT_DAY >=#{accountDay} AND USER_ID= #{userId}
+        GROUP BY ACCOUNT_DAY
+        ORDER BY ACCOUNT_DAY
+    </select>
+
+    <select id="getLotteryReports" resultType="com.xzy.pojo.order.response.ReportRp" >
+        SELECT TR.*,TL.LOTTERY_KEY FROM (
+        SELECT LOTTERY_ID,COUNT(1) TICKET_NUM,SUM(BET_AMT) BET_AMT,SUM(CASE WHEN TICKET_STATUS='DRAW' THEN 0 ELSE BET_AMT END) ACT_AMT,
+        SUM(WIN_AMT) WIN_AMT,SUM(BET_AMT*COMM_PCT/100) COMM
+        FROM HM_ORDER WHERE USER_ID=#{userId}
+
+        AND ACCOUNT_DAY=#{accountDay}
+        <if test="winOrLoserState=='WAITING' or winOrLoserState=='CANCEL' or winOrLoserState=='VOID'">
+            AND STATUS=#{winOrLoserState}
+        </if>
+
+        <if test="winOrLoserState=='DIVIDEND' or winOrLoserState==null">
+            AND (STATUS='DIVIDEND' OR STATUS='REDIVIDEND')
+        </if>
+        <if test="winOrLoserState=='WIN' or winOrLoserState=='LOSE'">
+            AND TICKET_STATUS = #{winOrLoserState}  AND (STATUS='DIVIDEND' OR STATUS='REDIVIDEND')
+        </if>
+          GROUP BY LOTTERY_ID
+        ) TR LEFT JOIN HM_CTRL.T_LOTTERY TL ON TR.LOTTERY_ID= TL.LOTTERY_ID ORDER BY TR.TICKET_NUM DESC
+    </select>
+    <!--日期统计-->
+    <select id="selectDetailTimeCount" resultType="com.xzy.pojo.order.response.DetailTimeCount">
+        <if test="userId !=null">
+        SELECT account_day,
+            <if test="type=='bh'">
+                SUM(bh_count) count
+            </if>
+            <if test="type=='zc'">
+                SUM(bet_count) count
+            </if>
+        FROM hm_order_daily_delivery
+        WHERE user_id = #{userId} AND account_day BETWEEN #{startTime} AND #{endTime}
+        GROUP BY account_day
+        </if>
+        <if test="parentId !=null">
+        SELECT account_day,SUM(bet_count) count
+        FROM hm_order_daily_classify
+        WHERE lottery_id = #{lotteryId} AND play_id = #{playId} AND kind_id = #{kindId}
+            AND parent_id=#{parentId} AND account_day BETWEEN #{startTime} AND #{endTime}
+        GROUP BY account_day
+        </if>
+    </select>
+    <select id="selectDetailTimeCountVoid" resultType="com.xzy.pojo.order.response.DetailTimeCount">
+        <if test="userId !=null">
+        SELECT account_day,
+            <if test="type=='bh'">
+                SUM(bh_count) count
+            </if>
+            <if test="type=='zc'">
+                SUM(bet_count) count
+            </if>
+        FROM hm_order_daily_delivery_void
+        WHERE user_id = #{userId} AND account_day BETWEEN #{startTime} AND #{endTime}
+        GROUP BY account_day
+        </if>
+        <if test="parentId !=null">
+        SELECT account_day,SUM(bet_count) count
+        FROM hm_order_daily_classify_void
+        WHERE lottery_id = #{lotteryId} AND play_id = #{playId} AND kind_id = #{kindId}
+            AND parent_id=#{parentId} AND account_day BETWEEN #{startTime} AND #{endTime}
+        GROUP BY account_day
+        </if>
+    </select>
+    <select id="selectDetailTimeCountWaiting" resultType="com.xzy.pojo.order.response.DetailTimeCount">
+        <if test="userId !=null">
+            SELECT account_day,COUNT(1) COUNT  FROM hm_order
+            WHERE user_id = #{userId} AND STATUS = #{status} AND account_day BETWEEN #{startTime} AND #{endTime}
+            GROUP BY account_day
+        </if>
+        <if test="parentId !=null">
+            SELECT COUNT(1) COUNT,account_day
+            FROM hm_order tr WHERE tr.user_id IN (SELECT user_id FROM hm_manage.hm_user WHERE (parent_path LIKE CONCAT('%,',#{parentId},',%')))
+            AND tr.status = #{status}
+            AND tr.account_day BETWEEN #{startTime} AND #{endTime}
+            AND lottery_id =  #{lotteryId} AND tr.ids ->> '$.playId' = #{playId}
+            GROUP BY account_day
+        </if>
+    </select>
+    <!--注单明细-->
+    <select id="findOrderByAgentId" resultType="com.xzy.pojo.order.response.AdminOrder">
+        SELECT ho.*,hu.username FROM
+        <if test="lastMonth==false or status=='WAITING'">
+            hm_order
+        </if>
+        <if test="lastMonth==true and status!='WAITING'">
+            hm_backup.hm_order_log${day}
+        </if>
+        ho ,hm_manage.hm_user hu WHERE ho.user_id IN (
+        SELECT user_id FROM hm_manage.hm_user h
+        WHERE (h.parent_path LIKE CONCAT('%,',#{agentId},',%')  OR h.user_id = #{agentId} )
+        <if test="username!=null and username !=''">
+            AND username= #{username}
+        </if>
+        )
+        <if test="status=='DIVIDEND'">
+            AND ( ho.status = 'DIVIDEND' OR  ho.status = 'REDIVIDEND')
+        </if>
+        <if test="status!=null and status!='' and status!='DIVIDEND'">
+            and ho.status = #{status}
+        </if>
+        <if test="lotteryIds!=null and lotteryIds.length>0" >
+            and ho.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and ho.game_no = #{gameNo}
+        </if>
+        <if test="oddsId!=null and oddsId!=''" >
+            and ho.odds_id = #{oddsId}
+        </if>
+        <if test="kindId!=null and kindId!=''">
+            AND JSON_EXTRACT(ho.ids,'$.kindId') = #{kindId}
+        </if>
+        <if test="playId!=null and playId!=''">
+            AND JSON_EXTRACT(ho.ids,'$.playId') = #{playId}
+        </if>
+        <if test="type=='bh'">
+             and bet_type='bh'
+        </if>
+        <if test="type=='zc'">
+             and bet_type='zc'
+        </if>
+        and ho.account_day between #{startTime} and #{endTime}
+        AND ho.user_id=hu.user_id
+        <if test="userId !=null and userId!=''">
+           and hu.user_id=#{userId}
+        </if>
+        order by order_id desc
+    </select>
+    <!--注单id查询-->
+    <select id="findOrderByOrderId" resultType="com.xzy.pojo.order.HmOrder">
+        SELECT ho.*,hu.username FROM hm_order ho,hm_manage.hm_user hu WHERE ho.user_id=hu.user_id
+        AND ho.order_id = #{orderId} and hu.parent_path LIKE CONCAT('%,',#{agentId},',%')
+    </select>
+    <!--交收报表-->
+    <select id="selectWinLose"  resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.user_id,tt.username,hu.nick_name,tt.user_level,tt.user_type
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_delivery tt,hm_manage.hm_user hu
+        WHERE tt.parent_id = #{userId} and tt.account_day BETWEEN  #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        and tt.user_id=hu.user_id
+        GROUP BY tt.user_id,tt.username,hu.nick_name,tt.user_level,tt.user_type
+        <if test="sort=='namedesc'">
+            order by username desc
+        </if>
+        <if test="sort=='nameasc'">
+            order by username asc
+        </if>
+        <if test="sort=='betdesc'">
+            order by bet_amt desc
+        </if>
+        <if test="sort=='betasc'">
+            order by bet_amt asc
+        </if>
+        <if test="sort=='windesc'">
+            order by bet_win_amt desc
+        </if>
+        <if test="sort=='winasc'">
+            order by bet_win_amt asc
+        </if>
+
+    </select>
+    <!--交收报表作废-->
+    <select id="selectWinLoseVoid"  resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.user_id,tt.username,hu.nick_name,tt.user_level,tt.user_type
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_delivery_void tt,hm_manage.hm_user hu
+        WHERE tt.parent_id = #{userId} and tt.account_day BETWEEN  #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        and tt.user_id=hu.user_id
+        GROUP BY tt.user_id,tt.username,hu.nick_name,tt.user_level,tt.user_type
+        <if test="sort=='namedesc'">
+            order by username desc
+        </if>
+        <if test="sort=='nameasc'">
+            order by username asc
+        </if>
+        <if test="sort=='betdesc'">
+            order by bet_amt desc
+        </if>
+        <if test="sort=='betasc'">
+            order by bet_amt asc
+        </if>
+        <if test="sort=='windesc'">
+            order by bet_win_amt desc
+        </if>
+        <if test="sort=='winasc'">
+            order by bet_win_amt asc
+        </if>
+
+    </select>
+
+    <select id="selectWinLoseWaiting"  resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT hu.user_id,hu.username,hu.nick_name,hu.user_level,hu.user_type,SUM(tr.bet_amt) bet_amt,COUNT(1) bet_count,
+        ROUND(SUM( JSON_EXTRACT(tr.ticket_detail,CONCAT( '$.user_level_',hu.user_level-1,'.ptBetAmt'))),4) actual_pt_bet_amt
+        FROM hm_order tr
+        JOIN hm_manage.hm_user hu ON tr.user_id IN
+        (SELECT user_id FROM hm_manage.hm_user WHERE (parent_path LIKE CONCAT('%,',hu.user_id,',%') OR user_id = hu.user_id ) )
+        AND hu.parent_id = #{userId}
+        AND account_day between #{startTime} and #{endTime}
+        AND tr.status = #{status}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="username!=null and username!=''">
+            and hu.username = #{username}
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and tr.game_no = #{gameNo}
+        </if>
+        GROUP BY user_id,username,user_level,user_type,nick_name
+        ORDER BY user_type,user_level,bet_amt DESC
+    </select>
+
+    <select id="selectBhWinLose"  resultType="com.xzy.pojo.order.response.BhAmtRp">
+        SELECT user_id,sum(bet_count) bet_count,sum(bet_amt) bh_amt,sum(bet_win_amt) bh_win_amt,sum(bet_comm) bh_comm
+        FROM hm_order_daily_bh tr where tr.user_id = #{userId}
+        AND tr.account_day between #{startTime} and #{endTime}
+        <if test="username!=null and username!=''" >
+            and tr.bet_user_id = ( SELECT user_id FROM hm_manage.hm_user WHERE   username = #{username} )
+        </if>
+        <if test="lotteryIds!=null and lotteryIds.length>0" >
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and tr.game_no = #{gameNo}
+        </if>
+        group by user_id
+    </select>
+
+    <select id="selectBhWinLoseWaiting"  resultType="com.xzy.pojo.order.response.BhAmtRp">
+        SELECT COUNT(1) bet_count,user_id,
+        ROUND(SUM(bet_amt),4) bh_amt,
+        ROUND(SUM(win_amt),4) bh_win_amt,
+        ROUND(SUM(bet_amt*comm_pct/100),4) bh_comm
+        FROM hm_order tr WHERE tr.user_id = #{userId}
+        AND tr.account_day between #{startTime} and #{endTime}
+        AND tr.status = #{status}
+        <if test="lotteryIds!=null and lotteryIds.length>0" >
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="username!=null and username!=''" >
+            and tr.bet_user_id = ( SELECT user_id FROM hm_manage.hm_user WHERE   username = #{username} )
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and tr.game_no = #{gameNo}
+        </if>
+        GROUP BY user_id
+    </select>
+    <!--交收报表按彩种查询-->
+    <select id="selectWinLoseByLottery" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.lottery_id
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_delivery tt
+        WHERE tt.parent_id = #{userId} and tt.account_day BETWEEN  #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        GROUP BY tt.lottery_id
+    </select>
+
+    <select id="selectWinLoseByLotteryVoid" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.lottery_id
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_delivery_void tt
+        WHERE tt.parent_id = #{userId} and tt.account_day BETWEEN  #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        GROUP BY tt.lottery_id
+    </select>
+
+    <select id="selectWinLoseByLotteryWaiting" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT lottery_id,COUNT(1) bet_count,
+        SUM(bet_amt) bet_amt
+        ,ROUND(SUM(JSON_EXTRACT(super_detail,'$.ptBetAmt')),4) actual_pt_bet_amt
+        FROM (
+        SELECT tr.lottery_id,tr.bet_amt,
+        JSON_EXTRACT(tr.ticket_detail,CONCAT( '$.user_level',hu.user_level-1)) super_detail
+        FROM hm_order tr
+        JOIN hm_manage.hm_user hu ON tr.user_id IN (
+        SELECT user_id FROM hm_manage.hm_user WHERE (parent_path LIKE CONCAT('%,',hu.user_id,',%') OR user_id = hu.user_id )
+        )
+        JOIN hm_manage.hm_user lg ON lg.user_id =#{userId} AND hu.parent_id = lg.user_id
+        AND account_day between #{startTime} and #{endTime}
+        AND tr.status = #{status}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="username!=null and username!=''">
+            and hu.username = #{username}
+        </if>
+        <if test="gameNo!=null and gameNo!=''">
+            and tr.game_no = #{gameNo}
+        </if>
+        ) da
+        GROUP BY lottery_id
+        ORDER BY lottery_id
+    </select>
+
+    <select id="selectBhWinLoseByLottery"  resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT lottery_id,sum(bet_count) bet_count,sum(bet_amt) bh_amt,sum(bet_win_amt) bh_win_amt,sum(bet_comm) bh_comm
+        FROM hm_order_daily_bh tr where tr.user_id = #{userId}
+        AND tr.account_day between #{startTime} and #{endTime}
+        <if test="username!=null and username!=''" >
+            and tr.bet_user_id = ( SELECT user_id FROM hm_manage.hm_user WHERE   username = #{username} )
+        </if>
+        <if test="lotteryIds!=null and lotteryIds.length>0" >
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY lottery_id
+        ORDER BY lottery_id
+    </select>
+
+    <select id="selectBhWinLoseByLotteryWaiting" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT COUNT(1) bet_count,lottery_id,
+        ROUND(SUM(bet_amt),4) bh_amt,
+        ROUND(SUM(win_amt),4) bh_win_amt,
+        ROUND(SUM(bet_amt*comm_pct/100),4) bh_comm
+        FROM hm_order tr WHERE tr.user_id = #{userId}
+        AND tr.account_day between #{startTime} and #{endTime}
+        AND tr.status = #{status}
+        <if test="lotteryIds!=null and lotteryIds.length>0" >
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="username!=null and username!=''" >
+            and tr.bet_user_id = ( SELECT user_id FROM hm_manage.hm_user WHERE   username = #{username} )
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and tr.game_no = #{gameNo}
+        </if>
+        GROUP BY lottery_id
+        ORDER BY lottery_id
+    </select>
+    <!--分类报表-->
+    <select id ="selectKind" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.lottery_id,tt.play_key,tt.kind_key,tt.play_id,tt.kind_id,tt.parent_id
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_classify tt
+        WHERE tt.parent_id = #{userId} AND tt.account_day  BETWEEN #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        GROUP BY tt.lottery_id,tt.play_key,tt.kind_key,tt.play_id,tt.kind_id,tt.parent_id
+    </select>
+    <select id ="selectKindVoid" resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT tt.lottery_id,tt.play_key,tt.kind_key,tt.play_id,tt.kind_id,tt.parent_id
+        ,SUM(bet_count) bet_count
+        ,SUM(bet_amt) bet_amt
+        ,SUM(bet_win_amt) bet_win_amt
+        ,SUM(bet_odds_amt) bet_odds_amt
+        ,SUM(to_lower_amt) to_lower_amt
+        ,SUM(to_lower_win) to_lower_win
+        ,SUM(to_lower_comm) to_lower_comm
+        ,SUM(pt_bet_amt) pt_bet_amt
+        ,SUM(bh_bet_pt_amt) bh_bet_pt_amt
+        ,SUM(actual_pt_bet_amt) actual_pt_bet_amt
+        ,SUM(actual_win_amt) actual_win_amt
+        ,SUM(actual_comm_amt) actual_comm_amt
+        ,SUM(gain_comm_amt) gain_comm_amt
+        ,SUM(gain_odds_amt) gain_odds_amt
+        ,SUM(to_uper_amt) to_uper_amt
+        ,SUM(to_uper_win) to_uper_win
+        ,SUM(actual_result) actual_result
+        ,SUM(gain_comm_odds) gain_comm_odds
+        FROM  hm_order_daily_classify_void tt
+        WHERE tt.parent_id = #{userId} AND tt.account_day  BETWEEN #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tt.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="gameNo!=null and gameNo!=''">
+                and game_no= #{gameNo}
+            </if>
+        </if>
+        <if test="username!=null and username!=''">
+            and tt.username = #{username}
+        </if>
+        GROUP BY tt.lottery_id,tt.play_key,tt.kind_key,tt.play_id,tt.kind_id,tt.parent_id
+    </select>
+
+    <select id="selectKindWaiting"  resultType="com.xzy.pojo.order.response.WinLoseInfo">
+        SELECT COUNT(1) bet_count,tr.lottery_id,
+        p.play_key,k.kind_key,p.play_id,k.kind_id,#{userId} parent_id,
+        SUM(bet_amt) bet_amt
+        FROM hm_order tr
+        JOIN hm_manage.hm_user hu ON tr.user_id IN
+        (SELECT user_id FROM hm_manage.hm_user WHERE parent_path LIKE CONCAT('%,', #{userId},',%'))
+        AND hu.user_id = tr.user_id
+        AND tr.status = #{status}
+        AND tr.account_day between  #{startTime} and #{endTime}
+        <if test="lotteryIds!=null and lotteryIds.length>0">
+            and tr.lottery_id in
+            <foreach item="item" index="index" collection="lotteryIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="username!=null and username!=''">
+            and hu.username = #{username}
+        </if>
+        <if test="gameNo!=null and gameNo!=''" >
+            and tr.game_no = #{gameNo}
+        </if>
+        JOIN hm_ctrl.t_play p ON p.play_id= tr.ids ->> '$.playId'
+        JOIN hm_ctrl.t_kind k ON k.kind_id= tr.ids ->> '$.kindId'
+        GROUP BY tr.lottery_id,p.play_key,k.kind_key,p.play_id
+        ORDER BY tr.lottery_id,p.ordering,k.ordering
+    </select>
+
+    <select id="findByMember" resultType="com.xzy.pojo.order.HmOrder">
+        SELECT tu.*,hu.username
+        FROM (
+        SELECT * FROM hm_order WHERE 1=1
+        <if test="lotteryId!=null and lotteryId!=''">
+            AND lottery_id = #{lotteryId}
+        </if>
+        <if test="agentId!=null and agentId!=''">
+            AND user_id IN ( SELECT user_id FROM hm_manage.hm_user WHERE parent_path LIKE concat('%,',#{agentId},',%'))
+        </if>
+        <if test="userId!=null and userId!=''">
+            AND user_id = #{userId}
+        </if>
+        <if test="accountDay!=null and accountDay!=''">
+            AND account_day = #{accountDay}
+        </if>
+        <if test="status=='DIVIDEND'">
+            AND (STATUS = 'DIVIDEND' OR STATUS = 'REDIVIDEND')
+        </if>
+        <if test="status!='DIVIDEND'">
+            and status = #{status}
+        </if>
+        <if test="status=='WIN' or status=='LOSE'">
+            AND TICKET_STATUS = #{status} AND (STATUS = 'DIVIDEND' OR STATUS = 'REDIVIDEND')
+        </if>
+        ) tu
+        JOIN hm_manage.hm_user hu ON tu.user_id = hu.user_id
+        ORDER BY tu.bet_time DESC,tu.order_id DESC
+    </select>
+
+    <select id="voidOrderByUser" statementType="CALLABLE" parameterType="Map">
+        {
+          call SP_VOID_USER_ORDER(
+                #{username,mode=IN,jdbcType=VARCHAR},
+                #{lotteryId,mode=IN,jdbcType=INTEGER},
+                #{gameNo,mode=IN,jdbcType=VARCHAR},
+                #{voidReason,mode=IN,jdbcType=VARCHAR},
+                #{voidType,mode=IN,jdbcType=VARCHAR}
+          )
+        }
+    </select>
+
+</mapper>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>结果后台</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="../js/common.js"></script>
+</head>
+<body>
+<div id="app">
+    <!-- 顶部开始 -->
+    <div class="homemain">
+        <div class="container">
+            <div class="logo"><a href="./index.html">结果后台</a></div>
+            <div class="left_open">
+                <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+            </div>
+            <ul class="layui-nav right" lay-filter="">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">{{username}} 管理員</a>
+                    <dl class="layui-nav-child"> <!-- 二级菜单 -->
+                        <!--<dd><a onclick="x_admin_show('个人信息','./pages/thread-list.html')">个人信息</a></dd>-->
+                        <dd><a _href="" @click="openUpdatePassword()">修改密码</a></dd>
+                        <dd><a href="javascript:;" @click="getLogout()">退出登录</a></dd>
+                    </dl>
+                </li>
+            </ul>
+
+        </div>
+        <div class="left-nav">
+            <div id="side-nav">
+                <ul id="nav">
+                    <li>
+                        <a _href="../pages/thread-list.html">
+                            <i class="iconfont">&#59040;</i>
+                            <cite>线程开关</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li>
+                        <a _href="../pages/https-total.html">
+                            <i class="iconfont">&#59055;</i>
+                            <cite>采集监控</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li>
+                        <a _href="../pages/history-list.html">
+                            <i class="iconfont">&#59095;</i>
+                            <cite>历史结果</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li>
+                        <a _href="../pages/link-history.html">
+                            <i class="iconfont">&#59060;</i>
+                            <cite>获取历史</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li >
+                        <a _href="../pages/lottery-list.html">
+                            <i class="iconfont">&#59067;</i>
+                            <cite>游戏设置</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li v-if="userLvl==0">
+                        <a _href="../pages/log-list.html">
+                            <i class="iconfont">&#59066;</i>
+                            <cite>日志查看</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                    <li v-if="userLvl==0">
+                        <a _href="../pages/user-manage.html">
+                            <i class="iconfont">&#59065;</i>
+                            <cite>用户管理</cite>
+                            <i class="iconfont nav_right"> </i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+                <ul class="layui-tab-title">
+                    <li>主页</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <iframe src='../pages/result-list.html' frameborder="0" scrolling="yes"
+                                class="x-iframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-content-bg"></div>
+        <div class="footer">
+            <div class="copyright">Result Manage @2020 MSG</div>
+        </div>
+    </div>
+    <form class="layui-form" id="showUpdateLoginPassword" style="display:none;margin: 20px">
+        <div class="layui-form-item">
+            <label class="layui-form-label"> 原始密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" required lay-verify="required" lay-reqtext="请输入密码，不能为空 "
+                       class="layui-input" v-model="param.oldPwd">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"> 新密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" required lay-verify="required" lay-reqtext="请输入密码，不能为空 "
+                       class="layui-input" v-model="param.newPwd">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"> 再次确认</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" required lay-verify="required" lay-reqtext="请输入密码，不能为空 "
+                       class="layui-input" v-model="param.newPwd1">
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            username: sessionStorage.getItem("user"),
+            userLvl: sessionStorage.getItem("userLvl"),
+            userInfo: {},
+            param: {
+                oldPwd: "",
+                newPwd: "",
+                newPwd1: "",
+            },
+        },
+        methods: {
+            async getLogout() {
+                let res = await axios.post('/user/logout');
+                if (res.data.success) {
+                    location.href = '/pages/login.html'
+                }
+            },
+            getLoginUser() {
+                let _this = this;
+                let res = axios.post('/user/info').then(res => {
+                    if (res.data.success) {
+                        _this.userInfo = res.data.data;
+                    }
+                });
+            },
+            saveKey() {
+                axios.get('/thread/ip/key').then(res => {
+                });
+            },
+            changeUserPassword() {
+                let _this = this;
+                if (_this.param.oldPwd != '' || _this.param.newPwd != '' || _this.param.newPwd1 != '') {
+                    if (_this.param.newPwd == _this.param.newPwd1) {
+                        _this.param.id = _this.userInfo.id;
+                        axios.put('/user/change/pwd', _this.param).then(res => {
+                            if (res.data.success) {
+                                layer.closeAll();
+                                layer.msg(res.data.data, {icon: 1, offset: 't'})
+                            } else {
+                                layer.msg(res.data.data, {icon: 5, offset: 't'})
+                            }
+                        });
+                    } else {
+                        _this.param.newPwd1 = "";
+                        layer.msg('再次确认密码，不匹配 ! 请重新输入', {icon: 5, offset: 't'})
+                    }
+                } else {
+                    layer.msg('请输入完整的参数!', {icon: 5, offset: 't'})
+                }
+            },
+            openUpdatePassword() {
+                let _this = this;
+                _this.param = {
+                    oldPwd: "",
+                    newPwd: "",
+                    newPwd1: "",
+                };
+                layer.open({
+                    type: 1,
+                    area: ['360px', '300px'],
+                    title: '修改密码',
+                    content: $("#showUpdateLoginPassword"),
+                    shade: 0,
+                    btn: ['提交']
+                    , btn1: function (index, layero) {
+                        _this.changeUserPassword();
+                    },
+                    cancel: function (layero, index) {
+                        layer.closeAll();
+                    }
+                });
+            }
+        },
+        mounted() {
+            this.getLoginUser();
+            this.saveKey();
+            let refreshTime = 10;
+            let timer = null;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                refreshTime -= 1;
+                if (refreshTime == 0) {
+                    //console.log(sessionStorage.getItem("user"))
+                    refreshTime = 10;
+                }
+            }, 1200);
+        },
+    })
+</script>

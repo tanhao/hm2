@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserLotteryMapper">
+
+    <select id="listLotterys" resultType="com.xzy.pojo.ctrl.vo.LotteryVO">
+        SELECT l.lottery_id,l.lottery_key,l.lottery_name,l.group_id,l.is_zkc,l.open_model,
+            ul.delay_open+l.delay_open delay_open,
+            ul.precede_close+l.precede_close precede_close,ul.zm_precede_close,
+            l.code_nums,l.result_size,ul.ordering,
+            ul.is_open_self,IFNULL(ls.is_link,0) is_link,IFNULL(ls.is_reset,0) is_reset,
+            r.game_no,r.action_time,r.open_time
+        FROM (
+            select * from t_user_lottery where user_id=#{companyId}
+            <if test="companyId==userId" >
+                and is_open_up=1
+            </if>
+            <if test="companyId!=userId" >
+                and is_open_self=1
+            </if>
+        ) ul
+        LEFT JOIN t_user_lottery_setting ls ON ls.user_id=#{userId} AND ls.lottery_id=ul.lottery_id
+        LEFT JOIN t_lottery l ON ul.lottery_id=l.lottery_id
+        LEFT JOIN (
+            SELECT r.lottery_id,r.game_no,r.action_time,r.open_time
+            FROM hm_order.hm_result r
+            WHERE r.ACTION_TIME> UNIX_TIMESTAMP() AND  <![CDATA[ r.open_time <=UNIX_TIMESTAMP() ]]>
+            AND r.ACCOUNT_DAY = DATE(DATE_ADD(NOW(), INTERVAL -7 HOUR))
+        ) AS r ON l.lottery_id=r.lottery_id
+        ORDER BY ul.ordering
+    </select>
+
+    <select id="getLottery" resultType="com.xzy.pojo.ctrl.vo.LotteryVO">
+                SELECT l.lottery_id,l.lottery_key,l.lottery_name,l.group_id,ul.delay_open+l.delay_open delay_open,ul.precede_close+l.precede_close precede_close,ul.zm_precede_close,l.code_nums,l.result_size,l.ordering,l.is_zkc,l.open_model,
+                    ul.is_open_self,IFNULL(ls.is_link,0) is_link,IFNULL(ls.is_reset,0) is_reset,
+                    r.game_no,r.action_time,r.open_time,
+                    prev_GameNo,prev_result,prev_lmcl,prev_yl
+                FROM (
+                    SELECT * FROM t_user_lottery WHERE user_id=#{companyId}
+                     <if test="companyId==userId" >
+                        and is_open_up=1
+                    </if>
+                    <if test="companyId!=userId" >
+                        and is_open_self=1
+                    </if>
+                 ) ul
+                LEFT JOIN t_user_lottery_setting ls ON ls.user_id=#{userId} AND ls.lottery_id=ul.lottery_id
+                JOIN t_lottery l ON ul.lottery_id=l.lottery_id
+                JOIN (
+                    SELECT lottery_id,GAME_NO,ACTION_TIME,OPEN_TIME,prev_GameNo,prev_result,prev_lmcl,prev_yl
+                    FROM (
+                    SELECT lottery_id,GAME_NO,ACTION_TIME,OPEN_TIME,
+                        LEAD(game_no,1) OVER(ORDER BY game_no DESC) prev_GameNo,
+                        LEAD(RESULT,1) OVER(ORDER BY game_no DESC) prev_result,
+                        LEAD(STATS->>'$.lmcl',1) OVER(ORDER BY game_no DESC) prev_lmcl,
+                        LEAD(STATS->>'$.yl',1) OVER(ORDER BY game_no DESC) prev_yl
+                    FROM hm_order.hm_result t WHERE  t.LOTTERY_ID= #{lotteryId} AND   <![CDATA[ ACCOUNT_DAY >= DATE(DATE_ADD(NOW(),INTERVAL -1 DAY))   ]]>
+                    ) da WHERE  ACTION_TIME> UNIX_TIMESTAMP() ORDER BY game_no LIMIT 1
+                ) AS r ON l.lottery_id=r.lottery_id
+                ORDER BY ul.ordering
+
+
+    </select>
+
+    <update id="updateOpenOrClose">
+        update t_user_lottery set is_open_self=#{isOpen} where user_id=#{userId} and lottery_id=#{lotteryId} and is_open_up=1
+    </update>
+
+    <update id="updateIsReset">
+        <!--
+        update t_user_lottery set is_reset=#{isReset} where user_id=#{userId} and lottery_id=#{lotteryId}
+        -->
+        INSERT INTO t_user_lottery_setting(user_id,lottery_id,is_link,is_reset)
+        SELECT user_id,lottery_id,is_link,is_reset FROM (
+            SELECT #{userId} user_id,#{lotteryId} lottery_id,0 is_link,#{isReset} is_reset
+        ) n
+        ON DUPLICATE KEY UPDATE
+        is_reset=n.is_reset;
+    </update>
+
+    <update id="updateIsLink">
+        <!--
+       update t_user_lottery set is_link=#{isLink} where user_id=#{userId} and lottery_id=#{lotteryId}
+       -->
+       INSERT INTO t_user_lottery_setting(user_id,lottery_id,is_link,is_reset)
+       SELECT user_id,lottery_id,is_link,is_reset FROM (
+           SELECT #{userId} user_id,#{lotteryId} lottery_id,#{isLink} is_link,0 is_reset
+       ) n
+       ON DUPLICATE KEY UPDATE
+       is_link=n.is_link;
+   </update>
+
+   <update id="updateOpenOrCloseForUp">
+       update t_user_lottery set is_open_up=#{isOpen},is_open_self=if(#{isOpen}=0,#{isOpen},is_open_self) where user_id=#{userId} and lottery_id=#{lotteryId}
+   </update>
+   <update id="updateOpenOrCloseForUpByGroup">
+       update t_user_lottery u, t_lottery l set u.is_open_up=#{isOpen},u.is_open_self=if(#{isOpen}=0,0,is_open_self)
+       WHERE u.lottery_id=l.lottery_id and u.user_id=#{userId} and l.group_id=#{groupId}
+   </update>
+
+   <update id="updateDelay">
+       update t_user_lottery set
+           delay_open=#{delayOpen},
+           precede_close=#{precedeClose},
+           zm_precede_close=#{zmPrecedeClose}
+       where user_id=#{userId} and lottery_id=#{lotteryId}
+   </update>
+    <update id="updateDelayObo">
+        update t_user_lottery set
+        <if test="delayType=='delayOpen'">
+            delay_open=GREATEST(0,delay_open+#{delay})
+        </if>
+        <if test="delayType=='precedeClose'">
+            precede_close=GREATEST(0,precede_close+#{delay})
+        </if>
+        <if test="delayType=='zmPrecedeClose'">
+            zm_precede_close=GREATEST(0,zm_precede_close+#{delay})
+        </if>
+        where user_id=#{userId} and lottery_id=#{lotteryId}
+    </update>
+
+   <update id="updateOrdering">
+       UPDATE t_user_lottery
+       SET ordering = CASE lottery_id
+       <foreach collection="lotterys" item="l" index="index">
+           WHEN #{l.lotteryId} THEN #{l.ordering}
+       </foreach>
+           ELSE ordering
+       END
+       WHERE user_id=#{userId}
+   </update>
+
+</mapper>

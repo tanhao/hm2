@@ -1,0 +1,19 @@
+server:
+  port: 23501
+  servlet:
+    context-path: /smart
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: hm2-server-smart-bet
+  task:
+    scheduling:
+      pool:
+        size: 30
+  #日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: smart
+logging:
+  config: classpath:logback-spring.xml

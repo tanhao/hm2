@@ -1,0 +1,24 @@
+server:
+  port: 23000
+  servlet:
+    context-path: /
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: hm2-govern-gateway
+    strategy:
+      gateway:
+        header:
+          priority: false
+
+#日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: gateway
+logging:
+  config: classpath:logback-spring.xml
+
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000

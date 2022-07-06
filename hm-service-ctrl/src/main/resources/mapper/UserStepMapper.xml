@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserStepMapper">
+
+
+    <select id="listUserStepDOs" resultType="com.xzy.pojo.ctrl.UserStepDO">
+        select * from t_user_step where user_id=#{userId}
+    </select>
+
+    <select id="listUserStepDOsByLotteryId" resultType="com.xzy.pojo.ctrl.UserStepDO">
+        with c as (select l.lottery_id,c.category_id,c.step from t_lottery l ,t_kind k ,t_category c where l.lottery_id=#{lotteryId}  and  k.group_id=l.group_id and c.kind_id=k.kind_id )
+        select c.category_id,ifnull(s.step,c.step) step from c left join t_user_step s on s.user_id=#{userId}  and s.lottery_id=c.lottery_id and s.category_id=c.category_id
+    </select>
+
+    <select id="updateStep" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.OddsRegressLimitFulloddsRQ">
+        {
+            CALL SP_UPDATE_STEP(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+</mapper>

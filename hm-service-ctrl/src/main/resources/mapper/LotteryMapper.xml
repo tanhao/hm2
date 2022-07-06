@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.LotteryMapper">
+
+    <select id="selectLotteryByCompanyId"  resultType="com.xzy.pojo.ctrl.vo.LotteryVO">
+         SELECT l.*
+         FROM t_lottery l LEFT JOIN t_user_lottery  ul
+         ON l.lottery_id = ul.lottery_id AND ul.user_id = #{companyId}
+         ORDER BY ul.ordering,l.ordering
+    </select>
+
+    <select id="listLotterys" resultType="com.xzy.pojo.ctrl.vo.LotteryVO">
+        <![CDATA[
+         SELECT l.lottery_id,l.lottery_key,l.lottery_name,l.group_id,l.delay_open,l.precede_close,l.zm_precede_close,l.code_nums,l.result_size,l.ordering,l.is_zkc,l.open_model,
+			r.game_no,r.action_time,r.open_time
+        FROM t_lottery l
+        LEFT JOIN (
+            SELECT r.lottery_id,r.game_no,r.action_time,r.open_time
+            FROM hm_order.hm_result r
+            WHERE r.ACTION_TIME> UNIX_TIMESTAMP() AND r.open_time <=UNIX_TIMESTAMP()
+            AND r.ACCOUNT_DAY =  DATE(DATE_ADD(NOW(), INTERVAL -7 HOUR))
+        ) AS r ON l.lottery_id=r.lottery_id
+        ORDER BY l.ordering
+        ]]>
+    </select>
+
+
+    <select id="getLottery" resultType="com.xzy.pojo.ctrl.vo.LotteryVO">
+        <![CDATA[
+
+            SELECT l.lottery_id,l.lottery_key,l.lottery_name,l.group_id,l.code_nums,l.result_size,l.ordering,l.is_zkc,l.open_model,
+                r.game_no,r.action_time,r.open_time,l.precede_close,l.delay_open,
+                prev_GameNo,prev_result,prev_lmcl,prev_yl
+            FROM  t_lottery l
+            JOIN (
+                SELECT lottery_id,GAME_NO,ACTION_TIME,OPEN_TIME,prev_GameNo,prev_result,prev_lmcl,prev_yl
+                FROM (
+                    SELECT lottery_id,GAME_NO,ACTION_TIME,OPEN_TIME,
+                    LEAD(game_no,1) OVER(ORDER BY game_no DESC) prev_GameNo,
+                    LEAD(RESULT,1) OVER(ORDER BY game_no DESC) prev_result,
+                    LEAD(STATS->>'$.lmcl',1) OVER(ORDER BY game_no DESC) prev_lmcl,
+                    LEAD(STATS->>'$.yl',1) OVER(ORDER BY game_no DESC) prev_yl
+                FROM hm_order.hm_result t WHERE  t.LOTTERY_ID= #{lotteryId} AND ACCOUNT_DAY >= DATE(DATE_ADD(NOW(),INTERVAL -1 DAY))
+                ) da WHERE  ACTION_TIME< UNIX_TIMESTAMP() ORDER BY game_no DESC LIMIT 1
+            ) AS r ON l.lottery_id=r.lottery_id
+
+        ]]>
+    </select>
+
+    <update id="updateDelay" >
+        update t_lottery set
+            delay_open=#{delayOpen},
+            precede_close=#{precedeClose},
+            zm_precede_close=#{zmPrecedeClose}
+        where lottery_id=#{lotteryId}
+    </update>
+    <update id="updateOrdering" >
+        UPDATE t_lottery
+        SET ordering = CASE lottery_id
+        <foreach collection="lotterys" item="l" index="index">
+            WHEN #{l.lotteryId} THEN #{l.ordering}
+        </foreach>
+            ELSE ordering
+        END
+    </update>
+
+    <update id="updateOpenModel">
+        update t_lottery set open_model=#{openModel} where lottery_id=#{lotteryId} and is_zkc=1
+    </update>
+
+</mapper>

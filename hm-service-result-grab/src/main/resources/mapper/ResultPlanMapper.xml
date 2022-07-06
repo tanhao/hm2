@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.ResultPlanMapper">
+
+    <select id="findPlanByDay" resultType="com.xzy.result.vo.ResultPlanVo">
+        SELECT trp.id,trp.lottery_key,trp.game_no,tri.result,plan_a,plan_b,plan_c,cost_a,cost_b,cost_c,
+        cost_all_a,cost_all_b,cost_all_c,profit_a,profit_b,profit_c,win_a,win_b,win_c,plan_count,
+        win_ano,win_bno,win_cno,
+        from_unixtime(tri.action_time) action_time
+        FROM t_result_plan trp,t_result_init tri
+        WHERE trp.lottery_key = tri.lottery_key
+        AND trp.game_no = tri.game_no AND tri.result_day = #{dateStr} AND tri.lottery_key = #{lotteryKey}
+        ORDER BY game_no desc
+    </select>
+
+    <select id="findKillByDay" resultType="com.xzy.result.vo.ResultKillVo">
+        SELECT * FROM t_result_kill
+        WHERE result_day = #{dateStr} AND lottery_key = #{lotteryKey}
+        ORDER BY game_no desc
+    </select>
+
+    <select id="findKillByDayCount" resultType="int">
+        SELECT COUNT(1) FROM t_result_kill
+        WHERE result IS NOT NULL
+        AND result_day = #{dateStr} AND lottery_key = #{lotteryKey}
+    </select>
+
+    <select id="findLotteryPlan" resultType="com.xzy.result.vo.LotteryPlanVo">
+        select * from t_lottery_plan
+    </select>
+
+    <select id="findByPlanByLot" resultType="com.xzy.result.vo.ResultPlanVo">
+         SELECT trp.id,trp.lottery_key,trp.game_no,tri.result,plan_a,plan_b,plan_c,cost_a,cost_b,cost_c,
+        cost_all_a,cost_all_b,cost_all_c,profit_a,profit_b,profit_c,win_a,win_b,win_c,plan_count,
+        win_ano,win_bno,win_cno,
+        FROM_UNIXTIME(tri.action_time) action_time
+        FROM t_result_plan trp,t_result_init tri
+        WHERE trp.lottery_key = tri.lottery_key
+        AND trp.game_no = tri.game_no AND tri.lottery_key =  #{lotteryKey}
+        ORDER BY game_no DESC
+        LIMIT 1
+    </select>
+
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.result.dao.ResultLinkMapper">
+
+    <insert id="installResult" parameterType="com.xzy.result.vo.ResultLinkVo">
+        INSERT INTO T_RESULT_LINK(lottery_key,game_no,https,result,create_time,account_day,create_ip)
+        SELECT lottery_key,game_no,https,result,create_time,account_day,create_ip FROM (
+        SELECT da.*,COUNT(1) ct FROM (
+        SELECT lottery_key,game_no,https,result,create_time,account_day,create_ip FROM T_RESULT_LINK
+        WHERE lottery_key=#{lotteryKey} and game_no=#{gameNo} and https =#{https} and create_ip =#{createIp}
+        UNION ALL
+        SELECT #{lotteryKey},#{gameNo},#{https},#{result},UNIX_TIMESTAMP(NOW()),FUN_GET_ACCOUNT_DAY(),#{createIp}
+        ) da ) d WHERE ct=1
+	</insert>
+
+    <select id="selectByHttpsAvg" resultType="com.xzy.result.vo.HttpsStrVo">
+
+        SELECT TL.LOTTERY_ID,TL.LOTTERY_KEY,TL.LOTTERY_NAME,TL.TOTAL_ROUND,TL.INVL_SECOND,
+            MAX(CASE TRL.HTTPS WHEN 'KAI_168' THEN TRL.SECOND_TIME ELSE '' END)  KAI_168,
+            MAX(CASE TRL.HTTPS WHEN 'BAO_CAI' THEN TRL.SECOND_TIME ELSE '' END)  BAO_CAI,
+            MAX(CASE TRL.HTTPS WHEN 'KAI_163' THEN TRL.SECOND_TIME ELSE '' END)  KAI_163,
+            MAX(CASE TRL.HTTPS WHEN 'KAI_1396' THEN TRL.SECOND_TIME ELSE '' END)  KAI_1396,
+            MAX(CASE TRL.HTTPS WHEN 'OPEN_CAI' THEN TRL.SECOND_TIME ELSE '' END)  OPEN_CAI,
+            MAX(CASE TRL.HTTPS WHEN 'KAI_CP' THEN TRL.SECOND_TIME ELSE '' END)  KAI_CP,
+            MAX(CASE TRL.HTTPS WHEN 'BO_YI' THEN TRL.SECOND_TIME ELSE '' END)  BO_YI,
+            MAX(CASE TRL.HTTPS WHEN 'KCW' THEN TRL.SECOND_TIME ELSE '' END)  KCW,
+            MAX(CASE TRL.HTTPS WHEN 'HM_ZKC' THEN TRL.SECOND_TIME ELSE '' END)  HM_ZKC
+            FROM (
+            SELECT LOTTERY_KEY,HTTPS,AVG(SECOND_TIME) SECOND_TIME
+            FROM T_RESULT_LINK
+            WHERE SECOND_TIME > -1
+            AND ACCOUNT_DAY BETWEEN #{startDate} AND #{endDate}
+            GROUP BY HTTPS,LOTTERY_KEY
+        ) TRL
+        RIGHT JOIN (
+            SELECT * FROM T_LOTTERY WHERE BY_OPEN = 1
+        ) TL ON TRL.LOTTERY_KEY = TL.LOTTERY_KEY
+        GROUP BY TL.LOTTERY_ID,TL.LOTTERY_KEY,TL.LOTTERY_NAME,TL.TOTAL_ROUND,TL.INVL_SECOND
+        ORDER BY TL.INVL_SECOND,LOTTERY_ID ASC
+    </select>
+
+    <select id="selectByNew10Result" resultType="com.xzy.result.vo.ResultLinkVo">
+        SELECT TRL.*,FROM_UNIXTIME(TRK.ACTION_TIME) ACTION_TIME FROM T_RESULT_LINK TRL,T_RESULT_INIT TRK
+        WHERE TRL.LOTTERY_KEY = TRK.LOTTERY_KEY AND TRL.GAME_NO = TRK.GAME_NO
+        AND TRL.HTTPS = #{link} AND TRL.LOTTERY_KEY = #{lotteryKey} AND TRL.CREATE_IP = #{ip}
+        ORDER BY TRL.CREATE_TIME DESC ,TRL.GAME_NO DESC LIMIT 0,10
+    </select>
+
+    <select id="selectByNewOneResult" resultType="com.xzy.result.vo.ResultLinkVo">
+       SELECT LOTTERY_KEY,HTTPS,MAX(DAY_TIME) DAY_TIME,CREATE_IP FROM T_RESULT_LINK WHERE
+       CREATE_IP = #{ip}
+       AND CREATE_IP IS NOT NULL AND SECOND_TIME >-1 GROUP BY LOTTERY_KEY,HTTPS,CREATE_IP
+    </select>
+
+
+
+</mapper>

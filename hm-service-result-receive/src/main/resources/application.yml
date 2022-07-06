@@ -1,0 +1,25 @@
+server:
+  port: 23300
+  servlet:
+    context-path: /result
+
+spring:
+  profiles:
+    active: test
+  application:
+    name: hm2-service-result-receive
+
+  #日志相关//无特殊要求，使用根目录下配置
+logback:
+  logFileDir: result-receive
+logging:
+  config: classpath:logback-spring.xml
+
+
+rocketmq:
+  instanceId: MQ_INST_1909372837772581_BXTxIdTf
+  accessKey: LTAI4G34pC5HsHAgenpsL8Af
+  secretKey: fqDLhSNgBzAaNBPwARJgzE9N6pYmc0
+  nameSrvAddr: http://MQ_INST_1909372837772581_BXUj2nAP.mq-internet-access.mq-internet.aliyuncs.com:80
+  topicResult: topic_result
+  httpSrvAddr: http://1909372837772581.mqrest.cn-hongkong.aliyuncs.com

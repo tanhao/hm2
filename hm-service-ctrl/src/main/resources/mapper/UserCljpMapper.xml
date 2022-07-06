@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.ctrl.dao.UserCljpMapper">
+
+    <select id="listUserCljpDOs" resultType="com.xzy.pojo.ctrl.UserCljpDO">
+        select * from t_user_cljp where user_id=#{userId} and lottery_id=#{lotteryId} and kind_id=#{kindId} and model=#{model}
+    </select>
+
+    <select id="updateCljp" statementType="CALLABLE" parameterType="com.xzy.pojo.ctrl.request.CljpRQ">
+        {
+            CALL SP_UPDATE_CLJP(
+                #{json,mode=IN,jdbcType=VARCHAR},
+                #{errcode,mode=OUT,jdbcType=INTEGER},
+                #{errmsg,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+    </select>
+
+    <delete id="delCljp" parameterType="com.xzy.pojo.ctrl.request.CljpRQ">
+        delete from t_user_cljp where  user_id=#{userId} and id=#{cljpId}
+    </delete>
+
+
+</mapper>
